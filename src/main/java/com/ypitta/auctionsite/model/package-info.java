@@ -1,0 +1,1 @@
+package com.ypitta.auctionsite.model;
