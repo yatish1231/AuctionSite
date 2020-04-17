@@ -27,7 +27,7 @@ public class LoginSuccessHandlerImpl implements AuthenticationSuccessHandler{
 			Authentication authentication) throws IOException, ServletException {
 		
 		handlerReq(request,response,authentication);
-		// TODO Auto-generated method stub
+		
 		
 	}
 	

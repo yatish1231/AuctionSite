@@ -57,43 +57,43 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <div class="w3-section w3-bottombar w3-padding-16">
       <span class="w3-margin-right">Filter:</span> 
       <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Design</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Photos</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Art</button>
+      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
     </div>
     </div>
   </header>
   
-  <div class="container">
+  <div class="w3-container w3-centre">
 
-    <form:form method="POST" modelAttribute="auctionObj" class="form-signin">
+    <form:form name="auctionForm" method="POST" modelAttribute="auctionObj" onsubmit="return validate()" class="w3-container w3-centre w3-padding-large">
      <div class="w3-third w3-container w3-margin-bottom">
      
-     <h2 class="form-signin-heading">Add your product to auction</h2>
+     <h2 class="w3-centre">Add your product to auction</h2>
       <img src="/imagefolder/${product.filepath}" alt="Norway" style="width:100%" class="w3-hover-opacity">
       
         <h3><b>${product.name}</b></h3>
         <h3><b>Price: ${product.price}</b></h3>
         <spring:bind path="price">
-            <div class="form-group">
-                <form:input type="text" path="price" class="form-control"
+            <div class="w3-centre">
+                <form:input type="text" path="price" class="w3-input"
                             placeholder="Price"></form:input>
             </div>
         </spring:bind>
         
-            <div class="form-group">
-                <input type="datetime-local" name="startTime" class="form-control"
+            <div class="w3-centre">
+                <input type="datetime-local" name="startTime" class="w3-input"
                             placeholder="Start date and Time"></input>
             </div>
             
         
-            <div class="form-group">
-                <input type="datetime-local" name="endTime" class="form-control"
+            <div class="w3-centre">
+                <input type="datetime-local" name="endTime" class="w3-input"
                             placeholder="End date and time"></input>
             </div>
             
         <input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+        <button class="w3-input w3-btn" type="submit">Submit</button>
         </div>
     </form:form>
   </div>
@@ -113,48 +113,28 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
    <a href="${contextPath}/seller/auction/viewall" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user fa-fw w3-margin-right"></i>View Live Auctions</a>
    </div>
     <hr>
-
-  <!-- Footer -->
+    
+	<!-- Footer -->
   <footer class="w3-container w3-padding-32 w3-dark-grey">
   <div class="w3-row-padding">
     <div class="w3-third">
-      <h3>FOOTER</h3>
-      <p>Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.</p>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+      <h3>Terms and Conditions</h3>
+      <p>User terms and conditions</p>
+      <p>2020 <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank">Auction Website</a></p>
     </div>
-  
-    <div class="w3-third">
-      <h3>BLOG POSTS</h3>
-      <ul class="w3-ul w3-hoverable">
-        <li class="w3-padding-16">
-          <img src="/w3images/workshop.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Lorem</span><br>
-          <span>Sed mattis nunc</span>
-        </li>
-        <li class="w3-padding-16">
-          <img src="/w3images/gondol.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Ipsum</span><br>
-          <span>Praes tinci sed</span>
-        </li> 
-      </ul>
-    </div>
+    
 
     <div class="w3-third">
-      <h3>POPULAR TAGS</h3>
+      <h3>POPULAR ITEMS</h3>
       <p>
-        <span class="w3-tag w3-black w3-margin-bottom">Travel</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">New York</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">London</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">IKEA</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">NORWAY</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">DIY</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Ideas</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Baby</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Family</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">News</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Clothing</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Shopping</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Sports</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Games</span>
+        <span class="w3-tag w3-black w3-margin-bottom">Travel</span>
       </p>
     </div>
 
   </div>
   </footer>
   
-  <div class="w3-black w3-center w3-padding-24">Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a></div>
-
+<div class="w3-black w3-center w3-padding-24">Project by <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank" class="w3-hover-opacity">Yatish Pitta</a></div>
 <!-- End page content -->
 </div>
 </div>
@@ -170,6 +150,39 @@ function w3_close() {
     document.getElementById("mySidebar").style.display = "none";
     document.getElementById("myOverlay").style.display = "none";
 }
+</script>
+<script type = "text/javascript">
+
+      function validate() {
+      var x = document.forms["auctionForm"]["price"].value;
+      var y = document.forms["auctionForm"]["startTime"].value;
+      var z = document.forms["auctionForm"]["endTime"].value;
+      
+         if(x  == "" && y == "" && z == "") {
+            alert( "Please fill all fields" );
+            document.auctionForm.price.focus() ;
+            document.auctionForm.startTime.focus() ;
+            document.auctionForm.endTime.focus() ;
+            return false;
+         }
+         if(x  == "") {
+             alert( "Please enter a price" );
+             document.auctionForm.price.focus() ;
+             return false;
+          }
+         if(y == "") {
+             alert( "Please enter a start time" );
+             document.auctionForm.startTime.focus() ;
+             return false;
+          }
+         if(z == "") {
+              alert( "Please add a end time" );
+              document.auctionForm.endTime.focus() ;
+              return false;
+           }
+        
+         return true ;
+      }
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>

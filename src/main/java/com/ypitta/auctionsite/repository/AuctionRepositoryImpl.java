@@ -14,6 +14,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +37,8 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 	
 	@Autowired
 	UserRepositoryInterface userRepository;
+	
+	private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
 	
 	private Session session_cur = null;
 	
@@ -100,13 +104,14 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 	@Override
 	public void addAuction(String username, int id, Auction auction) {
 		
-		beginTransaction();
+		_LOGGER.info("Add auction by username, id, auction");
 		Seller seller = (Seller)userRepository.findOne(username);
+		beginTransaction();
 		Product prod = seller.getProducts().stream().filter(p -> p.getId() == id).findFirst().get();
 		int i = seller.getProducts().indexOf(prod);
 		seller.getProducts().get(i).setInAuction(true);
+		getSession().update(seller.getProducts().get(i));
 		auction.setProduct(seller.getProducts().get(i));
-		getSession().saveOrUpdate(seller);
 		getSession().save(auction);
 		commit();
 		close();
@@ -114,40 +119,41 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 
 	@Override
 	public Auction getAuction(int id) {
-
+		_LOGGER.info("get auction by id: "+id);
 		Auction auc = (Auction)getSession().get(Auction.class, id);
+		if(auc != null) {
 		if(auc.isActive()) {
 			return auc;
 		}
+		_LOGGER.debug("Auction is not active!");
+		}
+		_LOGGER.debug("Auction instace not found: Null value");
 		return null;
 	}
 
-	@Override
-	public Auction getAuctionByProduct(int name) {
-		// TODO Auto-generated method stub
-		Auction auc = (Auction)getSession().get(Auction.class, name);
-		return auc;
-	}
 
 	@Override
 	public List<Auction> getAllActiveAuctions() {
-		// TODO Auto-generated method stub
+		
+		_LOGGER.info("Getting active auctions...");
 		List<Auction> active = new ArrayList<Auction>();
-		List<Auction> temp = (List<Auction>)getSession().createCriteria(Auction.class).list();
+		List<Auction> temp = (List<Auction>) getSession().createCriteria(Auction.class).list();
 		if(!temp.isEmpty()) {
 			for (Auction auction : temp) {
-				System.out.println("state: " + auction.getId()+ auction.isActive());
 				if(auction.isActive()) {
 					active.add(auction);
+					_LOGGER.debug("auction is active" + auction.getId());
 				}
 			}
 			return active;
 		}
+		_LOGGER.debug("No active auctions found");
 		return null;
 	}
 
 	@Override
 	public boolean removeProductFromAuction(String name, int id) {
+		_LOGGER.info("removing product from auction :" +id + "username" + name);
 		beginTransaction();
 		Product prod = (Product)getSession().get(Product.class, id);
 		if(prod.getSeller().getUsername().equalsIgnoreCase(name)) {
@@ -160,7 +166,9 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 				close();
 				return true;
 			}
+			_LOGGER.error("Auction or product instance is null");
 		}
+		_LOGGER.error("Unable to delete product. Couldn't confirm identity");
 	return false;	
 	}
 
@@ -175,46 +183,62 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 
 	@Override
 	public String placeBidByUserName(String name, int id, Bid bid) {
-		
+		_LOGGER.info("Placing user " + name + " bid...");
 		beginTransaction();
 		User user = (User)getSession().get(User.class, name);
+		if(user == null) {
+			commit();
+			close();
+			_LOGGER.error("User not found!");
+			throw new NullPointerException("User Object is null");
+		}
 		Auction auction = getAuction(id);
 		if(auction != null) {
 			if(auction.getBids() == null) {
-				System.out.println("it is null");
+				
 				auction.setBids(new ArrayList<Bid>());
 			}
 			
 			if(auction.getBids().isEmpty()) {
-				System.out.println("Empty entry "+bid.getPrice() + bid.getBid_time());
+				_LOGGER.info("Placing first bet for auction id: "+id);
 				bid.setUser(user);
 				bid.setAuction(auction);
 				auction.getBids().add(bid);
-				getSession().save(auction);
+				getSession().saveOrUpdate(auction);
 				commit();
 				close();
 				return "Successfully Placed First Bid!";
 			}
 			
 		Criteria crt = getSession().createCriteria(Bid.class);
+		
 		crt = crt.add(Restrictions.eq("auction.id", id)).setProjection(Projections.projectionList().add(Projections.max("price")).add(Projections.max("bid_time")));
 		Object[] cur = (Object[])crt.uniqueResult();
+		
 		if(cur.length > 0) {
-			if((double)cur[0] > bid.getPrice() && ((Date)cur[1]).before(Calendar.getInstance().getTime())) {
-				System.out.println("Not empty entry");
+			
+			if((double)cur[0] < bid.getPrice() && ((Date)cur[1]).before(bid.getBid_time())) {
+				
 				bid.setUser(user);
 				bid.setAuction(auction);
 				auction.getBids().add(bid);
-				getSession().save(auction);
+				getSession().saveOrUpdate(auction);
 				commit();
 				close();
+				_LOGGER.info("Successfully placed bid user" + user.getUsername());
 				return "Successfully added new Bid!!";
 			}
+			_LOGGER.debug("Failed to place bid. Didn't meet requirements");
+			commit();
+			close();
 			return "Failed to bid, another user might have bid higher or earlier";
 			
 		}
 				
 		}
+		_LOGGER.error("Auction not found. Cannot place bid");
+		commit();
+		close();
 		return "Auction timed out!";
 	}
 
@@ -227,6 +251,34 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 		}
 		return new ArrayList<Bid>(auc.getBids());
 	}
+
+	@Override
+	public List<Bid> getUserBids(String username) {
+		
+		beginTransaction();
+		List<Bid> bids = (List<Bid>) getSession().createCriteria(Bid.class).add(Restrictions.eq("user.username", username)).list();
+		if(bids.isEmpty() || bids == null) {
+			commit();
+			close();
+			return null;
+		}
+		commit();
+		close();
+		return bids;
+		
+	}
+
+	@Override
+	public Object[] getCurrentHighestBid(int auctionId) {
+		_LOGGER.info("Getting current highest bid");
+		beginTransaction();
+		Criteria crt = getSession().createCriteria(Bid.class);
+		crt = crt.add(Restrictions.eq("auction.id", auctionId)).setProjection(Projections.projectionList().add(Projections.max("price")).add(Projections.max("bid_time")));
+		Object[] cur = (Object[])crt.uniqueResult();
+		commit();
+		close();
+		return cur;
+		}
 	
 	
 }

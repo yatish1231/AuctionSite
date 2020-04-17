@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
+<head>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
-<title>W3.CSS Template</title>
+<title>View Bids</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -11,8 +12,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <style>
-body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
+body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 </style>
+
+</head>
 <body class="w3-light-grey w3-content" style="max-width:1600px">
 
 <c:if test="${pageContext.request.userPrincipal.name != null}">    	
@@ -32,7 +35,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
   </div>
   <div class="w3-bar-block">
     <a href="${contextPath}/buyer/auction/viewall" onclick="" class="w3-bar-item w3-button w3-padding w3-text-teal"><i class="fa fa-th-large fa-fw w3-margin-right"></i>View Live Auctions</a> 
-    <a href="#about" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user fa-fw w3-margin-right"></i>View my Bids</a> 
+    <a href="${contextPath}/buyer/auction/view/bids" onclick="w3_close()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user fa-fw w3-margin-right"></i>View my Bids</a> 
     <a href="#contact" onclick="document.forms['logoutForm'].submit()" class="w3-bar-item w3-button w3-padding"><i class="fa fa-envelope fa-fw w3-margin-right"></i>Logout</a>
   </div>
 </nav>
@@ -52,29 +55,48 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <div class="w3-section w3-bottombar w3-padding-16">
       <span class="w3-margin-right">Filter:</span> 
       <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Design</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Photos</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Art</button>
+      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
     </div>
     </div>
   </header>
   <c:if test="${requestScope.message != null}"><h2>${requestScope.message}</h2></c:if>
-  
+  <div class="w3-container w3-centre w3-padding-large">
   <c:if test="${requestScope.auction != null}">
-		Bid view page 
-		${requestScope.auction.product.name}
-		${requestScope.auction.product.id}
-		${requestScope.auction.product.price}
-		<form:form method="POST" modelAttribute="bidObj" action="${contextPath}/buyer/auction/bid/${requestScope.auction.product.name}/${requestScope.auction.product.id}" class="form-signin">
-        <h2 class="form-signin-heading">Bid</h2>
+  		<div class="w3-cell-row">
+  		<div class="w3-cell w3-padding" style="width:50%">
+  		<img src="/imagefolder/${requestScope.auction.product.filepath}" style="width:100%;max-width:500px" class="w3-hover-opacity w3-card-4">
+  		</div>
+  		<div class="w3-cell w3-padding"> 
+		<div class="w3-left-align"><h2>${requestScope.auction.product.name}</h2></div>
+		<div class="w3-left-align"><h4>Product Id: <b>${requestScope.auction.product.id}</b></h4></div>
+		<div class="w3-left-align"><h4>Starting Price: <b>${requestScope.auction.product.price}</b></h4></div>
+		<div class="w3-container">
+		<form:form name="mybidform" method="POST" modelAttribute="bidObj" onsubmit="return validate()" action="${contextPath}/buyer/auction/bid/${requestScope.auction.product.name}/${requestScope.auction.product.id}" class="w3-container w3-centre w3-padding-large">
+        <h3 class="w3-centre">Place Bid</h3>
         <spring:bind path="price">
-            <div class="form-group">
-                <form:input type="text" path="price" class="form-control"
-                            placeholder="Your Bid $$$"></form:input>
+            <div>
+                <form:input class="w3-input" type="text" path="price"
+                            placeholder="Your Bid $$$" ></form:input>
+                <form:errors path="price"></form:errors>            
             </div>
         </spring:bind>
-     <button type="submit" name="placeBid">Place Bid</button>
+        <spring:bind path="id" >
+                <form:input type="hidden" path="id"
+                           value="${requestScope.auction.id}" ></form:input>
+                <form:errors path="id"></form:errors>
+        </spring:bind>
+        <spring:bind path="time" >
+                <form:input type="hidden" path="time"
+                           value="<%= new java.util.Date() %>" ></form:input>
+                <form:errors path="time"></form:errors>
+        </spring:bind>
+     <button class="w3-input w3-btn" type="submit" name="placeBid">Place Bid</button>
 	</form:form>
+	</div>
+	</div>
+	</div>
 	<table class="w3-table-all">
 		<thead>
 		 <tr class="w3-light-grey">
@@ -84,7 +106,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
 			</tr>
 		</thead>
 		<tbody>
-		<c:forEach var="bid" items="${requestContext.auction.bids}">
+		<c:forEach var="bid" items="${requestScope.placedBids}">
 			<tr>
 			<td>${bid.user.username}</td>
 			<td>${bid.bid_time}</td>
@@ -95,6 +117,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
 	</table>
 	
 	</c:if>
+	</div>
   <!-- Pagination -->
   <div class="w3-center w3-padding-32">
     <div class="w3-bar">
@@ -118,55 +141,28 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <div class="w3-grey">
       <div class="w3-container w3-dark-grey w3-padding w3-center" style="width:65%">65%</div>
     </div>
-    <p>
-      <button class="w3-button w3-dark-grey w3-padding-large w3-margin-top w3-margin-bottom">
-        <i class="fa fa-download w3-margin-right"></i>Show Live Auctions
-      </button>
-    </p>
-    <hr>
     
 
   <!-- Footer -->
-  <footer class="w3-container w3-padding-32 w3-dark-grey">
+    <footer class="w3-container w3-padding-32 w3-dark-grey">
   <div class="w3-row-padding">
     <div class="w3-third">
-      <h3>FOOTER</h3>
-      <p>Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.</p>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+      <h3>Terms and Conditions</h3>
+      <p>User terms and conditions</p>
+      <p>2020 <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank">Auction Website</a></p>
     </div>
   
     <div class="w3-third">
-      <h3>BLOG POSTS</h3>
-      <ul class="w3-ul w3-hoverable">
-        <li class="w3-padding-16">
-          <img src="/w3images/workshop.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Lorem</span><br>
-          <span>Sed mattis nunc</span>
-        </li>
-        <li class="w3-padding-16">
-          <img src="/w3images/gondol.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Ipsum</span><br>
-          <span>Praes tinci sed</span>
-        </li> 
-      </ul>
-    </div>
-
-    <div class="w3-third">
-      <h3>POPULAR TAGS</h3>
+      <h3>POPULAR ITEMS</h3>
       <p>
-        <span class="w3-tag w3-black w3-margin-bottom">Travel</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">New York</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">London</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">IKEA</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">NORWAY</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">DIY</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Ideas</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Baby</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Family</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">News</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Clothing</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Shopping</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Sports</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Games</span>
+        <span class="w3-tag w3-black w3-margin-bottom">Travel</span>
       </p>
     </div>
 
   </div>
   </footer>
   
-  <div class="w3-black w3-center w3-padding-24">Project by<a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">Yatish Pitta</a></div>
-
+<div class="w3-black w3-center w3-padding-24">Project by <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank" class="w3-hover-opacity">Yatish Pitta</a></div>
 <!-- End page content -->
 </div>
 </div>
@@ -182,6 +178,22 @@ function w3_close() {
     document.getElementById("myOverlay").style.display = "none";
 }
 </script>
+<script type = "text/javascript">
 
+      function validate() {
+      var x = document.forms["mybidform"]["price"].value;
+         if( x  == "" ) {
+            alert( "Please enter a price" );
+            document.mybidform.price.focus() ;
+            return false;
+         }
+         if( x < ${requestScope.auction.product.price} ) {
+            alert( "Price below minimum" );
+            document.mybidform.price.focus() ;
+            return false;
+         }
+         return true ;
+      }
+</script>
 </body>
 </html>

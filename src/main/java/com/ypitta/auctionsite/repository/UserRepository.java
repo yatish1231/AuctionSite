@@ -5,6 +5,8 @@ import javax.transaction.Transactional;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,8 @@ public class UserRepository implements UserRepositoryInterface{
 	
 	@Autowired
 	SessionFactory session;
+	
+	private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
 	
 	private Session session_cur = null;
 	
@@ -44,11 +48,14 @@ public class UserRepository implements UserRepositoryInterface{
 	
 	public User findOne(String id) {
 		User user = null;	
+		_LOGGER.info("Fetching user - findOne");
 		beginTransaction();
 		user = (User)getSession().get(User.class, id);
-		if(user != null) {getSession().refresh(user);}
+		if(user != null) {
+			_LOGGER.info("User found! Refreshing entity");
+			getSession().refresh(user);
+			}
 		commit();
-		getSession().flush();
 		close();
 		return user;
 	}
@@ -60,8 +67,10 @@ public class UserRepository implements UserRepositoryInterface{
 	}
 	
 	public boolean save(User user) {
+		_LOGGER.info("saving user....");
 		beginTransaction();
 		getSession().saveOrUpdate(user);
+		_LOGGER.info("new user saved: username" + user.getUsername());
 		commit();
 		close();
 		return true;
@@ -73,6 +82,7 @@ public class UserRepository implements UserRepositoryInterface{
 
 	
 	public void delete(String id) {
+		_LOGGER.info("Deleting user by Id: " + id);
 		beginTransaction();
 		User user = (User) getSession().get(User.class, id);
 		getSession().delete(user);
@@ -93,11 +103,6 @@ public class UserRepository implements UserRepositoryInterface{
 		return (List<User>) session.getCurrentSession().createQuery("from users").list();
 	}
 
-
-	public void flush() {
-		// TODO Auto-generated method stub
-		
-	}
 
 
 }

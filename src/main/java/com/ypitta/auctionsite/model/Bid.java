@@ -21,8 +21,9 @@ import org.hibernate.annotations.CascadeType;
 public class Bid {
 	
 	@Id
+	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private int id;
 		
 	@ManyToOne
 	@JoinColumn(name = "user_name", nullable = false)
@@ -38,11 +39,12 @@ public class Bid {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date bid_time;
 
-	public long getId() {
+
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

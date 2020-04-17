@@ -27,6 +27,8 @@ import com.ypitta.auctionsite.service.AuctionService;
 import com.ypitta.auctionsite.service.SecurityService;
 import com.ypitta.auctionsite.service.SellerService;
 import com.ypitta.auctionsite.service.UserService;
+import com.ypitta.auctionsite.util.BidForm;
+import com.ypitta.auctionsite.validator.BidValidator;
 import com.ypitta.auctionsite.validator.UserValidator;
 
 @Controller
@@ -47,9 +49,20 @@ public class AuctionController {
     @Autowired
     private AuctionService auctionService;
     
+    @Autowired
+    private BidValidator bidValidator;
     
+    
+    /**
+     * Mapping 
+     * @param model
+     * @param id
+     * @return
+     */
     @RequestMapping(value = "seller/auction/add/{productName}/{id}",method = RequestMethod.GET)
     public String addProductToAuctionForm(Model model, @PathVariable int id) {
+    	
+    	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
     	System.out.println("id value at request add product to auction form "+id);
     	Product product = sellerService.getProductById(username, id);
@@ -59,16 +72,20 @@ public class AuctionController {
     		model.addAttribute("product", product);
     		return "auction-form";
     	}
+    	model.addAttribute("message", "Could not add product!");
     	return "error";
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Unknown error occured");
+			return "error";
+		}
     }
-    
-    
-    
     
     @RequestMapping(value = "seller/auction/add/{productName}/{id}", method = RequestMethod.POST)
     public String addProductToAuction(@ModelAttribute("auctionObj") Auction auction, @PathVariable("productName") String prodName,
     	@RequestParam("startTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime startTime, 
-    	@RequestParam("endTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endTime, @PathVariable int id) {
+    	@RequestParam("endTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endTime, @PathVariable int id,
+    	Model model) {
     	String result;
     	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -80,42 +97,52 @@ public class AuctionController {
     		auction.setBids(new ArrayList<Bid>());
     	}
     	sellerService.addProductToAuction(username, id, auction);
-    	
-    		result = "redirect:/seller/homepage";
+    	model.addAttribute("message", "Successfully added product to auction!");
+    	result = "redirect:/seller/homepage";
     	}
     	catch (Exception e) {
-    		e.printStackTrace();
-			result = "redirect:/error";
+    	e.printStackTrace();
+    	model.addAttribute("message", "Could not add product to auction");	
+		result = "error";
 		}
     return result;
     }
     
     
     @RequestMapping(value = "seller/auction/remove/{productName}/{id}", method = RequestMethod.POST)
-    public String removeProductFromAuction(@PathVariable("productName") String name, @PathVariable int id) {
+    public String removeProductFromAuction(@PathVariable("productName") String name, @PathVariable int id, Model model) {
     	
     	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
     	boolean result = sellerService.removeProductFromAuction(username,id);
     	if(result) {
+    		model.addAttribute("message", "Removed product from auction");
     		return "redirect:/seller/homepage";
     	}
     	}
     	catch (Exception e) {
-    		e.printStackTrace();
-			
+    	e.printStackTrace();
+		model.addAttribute("message", "Could not remove product from auction - Unknown error occured");	
+		return "error";
 		}
-    	return "redirect:/error";
+    	model.addAttribute("message", "Could not remove product from auction - Could not find auction");	
+		return "error";
     }
     
     @RequestMapping(value = "seller/auction/viewall",method = RequestMethod.GET)
     public String getSellerProductsInAuction(Model model) {
+    	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
     	List<Product> auctions = sellerService.getAllProductsInAuction(username);
     	if(auctions!= null) {
     		model.addAttribute("auctions", auctions);
     		return "auction-view-seller";
     	}
+    	}
+    	catch (Exception e) {
+    		model.addAttribute("message", "Error occured");
+        	return "error";
+		}
     	model.addAttribute("message", "No Active Auctions now!!!!");
     	return "auction-view-seller";
     }
@@ -136,8 +163,28 @@ public class AuctionController {
     	return "auction-view-buyer";
     }
     
+    @RequestMapping(value = "buyer/auction/view/bids",method = RequestMethod.GET)
+    public String getUserBids(Model model) {
+    	try {
+    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	List<Bid> bids = auctionService.getAllUserBids(username);
+    	if(bids == null || bids.isEmpty()) {
+    		model.addAttribute("message", "You don't have any bids placed!");
+    		return "bid-view-buyer";
+    	}
+    	model.addAttribute("userBids", bids);
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
+    	
+    	return "bid-view-buyer";
+    }
+    
     @RequestMapping(value = "buyer/auction/bid/{productName}/{id}", method = RequestMethod.GET)
     public String getUserBidPage(Model model, @PathVariable int id) {
+    	try {
     	Auction auc = auctionService.getAuctionByProductId(id);
     	if(auc == null) {
     		model.addAttribute("message", "Auction does not exist");
@@ -145,23 +192,43 @@ public class AuctionController {
     	}
     	if(auc.getBids().isEmpty()) {
     		model.addAttribute("auction", auc);
-    		model.addAttribute("bidObj", new Bid());
+    		model.addAttribute("bidObj", new BidForm());
     		model.addAttribute("message", "You are the first bidder!!!!");
     		return "bid-view";
     	}
     	model.addAttribute("auction", auc);
+    	model.addAttribute("bidObj", new BidForm());
+    	model.addAttribute("placedBids", auc.getBids());
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
     	return "bid-view";
     }
     
     @RequestMapping(value = "buyer/auction/bid/{productName}/{id}", method = RequestMethod.POST)
-    public String placeUserBid(@ModelAttribute("bidObj") Bid bid, @PathVariable int id, @PathVariable("productName") String prodName,
+    public String placeUserBid(@ModelAttribute("bidObj") BidForm bidForm, @PathVariable int id, @PathVariable("productName") String prodName,
     		BindingResult bindingresult, Model model){
-    	
+    	try {
+    		bidValidator.validate(bidForm, bindingresult);
+    		if(bindingresult.hasErrors()) {
+    			model.addAttribute("message", "Cannot place bid! Another user has bid higher or earlier!!");
+    			return getUserBidPage(model, id);
+    		}
+    		Bid bid = new Bid();
+    		bid.setPrice(bidForm.getPrice());
+    		bid.setId(new Integer(0));
+    		bid.setBid_time(bidForm.getTime());
     		String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    		bid.setBid_time(Calendar.getInstance().getTime());
     		String res = auctionService.placeBidUsername(username, id, bid);
     		model.addAttribute("message", res);
-    		return "redirect:/buyer/auction/bid/"+prodName +"/"+String.valueOf(id);
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
+    		return getUserBidPage(model, id);
     }
     
 }

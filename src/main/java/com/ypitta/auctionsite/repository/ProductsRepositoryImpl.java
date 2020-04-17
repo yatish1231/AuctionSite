@@ -81,24 +81,18 @@ public class ProductsRepositoryImpl implements ProductsRepository{
 		
 	}
 
-	@Override
-	public Product getProduct(String name) {
-		
-		Product prod = (Product)getSession().createCriteria(Product.class).add(Restrictions.eq("name", name)).uniqueResult();
-	
-		return prod;
-	}
 
 	@Override
 	public void saveOrUpdateProducts(String seller, Product product) {
 		
 		beginTransaction();
-		Seller ans = (Seller)getSession().get(Seller.class, seller);
-		for(Product prod: ans.getProducts()) {
-			if(prod.getId() == product.getId()) {
-				getSession().saveOrUpdate(product);
-			}
-		}
+		Seller seller_obj = (Seller) getSession().get(Seller.class, seller);
+		Product prod = seller_obj.getProducts().stream().filter(p -> p.getId() == product.getId()).findFirst().get();
+		prod.setName(product.getName());
+		prod.setCategory(product.getCategory());
+		prod.setFilepath(product.getFilepath());
+		prod.setPrice(product.getPrice());
+		getSession().update(seller_obj);
 		commit();
 		close();
 	}
@@ -151,7 +145,7 @@ public class ProductsRepositoryImpl implements ProductsRepository{
 		beginTransaction();
 		Seller seller = (Seller) getSession().get(User.class, username);
 		if(seller != null) {
-			System.out.println("delete product by id :" +id);
+			
 		Product prod = seller.getProducts().stream().filter(p -> p.getId() == id).findFirst().get();
 		prod.setSeller(null);
 		seller.getProducts().remove(prod);
@@ -163,7 +157,6 @@ public class ProductsRepositoryImpl implements ProductsRepository{
 		}
 		return false;
 	}
-	
-	
+
 	
 }

@@ -46,7 +46,8 @@ public class Auction {
 	@Transient
 	private boolean isActive;
 	
-	@OneToMany(mappedBy = "auction", orphanRemoval = true, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "auction", orphanRemoval = true)
+	@Cascade(value = org.hibernate.annotations.CascadeType.ALL)
 	private List<Bid> bids;
 
 	public int getId() {

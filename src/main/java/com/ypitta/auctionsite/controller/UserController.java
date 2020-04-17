@@ -38,6 +38,7 @@ import com.ypitta.auctionsite.service.SecurityService;
 import com.ypitta.auctionsite.service.SellerService;
 import com.ypitta.auctionsite.service.UserService;
 import com.ypitta.auctionsite.validator.UserValidator;
+import com.ypitta.auctionsite.validator.addProductValidator;
 
 @Controller
 public class UserController {
@@ -60,7 +61,8 @@ public class UserController {
     @Autowired
     private AuctionService auctionService;
     
-    
+    @Autowired
+    private addProductValidator productValidator;
     
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public String registration(Model model) {
@@ -71,7 +73,9 @@ public class UserController {
 
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public String registration(@ModelAttribute("userForm") User userForm, @RequestParam(required = true) String type, @RequestParam(required = false) String social_id, BindingResult bindingResult, Model model) {
-        userValidator.validate(userForm, bindingResult);
+        
+    	try {
+    	userValidator.validate(userForm, bindingResult);
         
         if (bindingResult.hasErrors()) {
             return "registration";
@@ -102,7 +106,11 @@ public class UserController {
 	    userService.save(userForm);
 	    
         securityService.autologin(userForm.getUsername(), userForm.getPassword());
-
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error has occured");
+			return "error";
+		}
         return "redirect:/welcome";
     }
 
@@ -112,6 +120,7 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Model model, String error, String logout) {
     	
+    	try {
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     	if(!(auth instanceof AnonymousAuthenticationToken)) {
     		
@@ -122,7 +131,11 @@ public class UserController {
 
         if (logout != null)
             model.addAttribute("message", "You have been logged out successfully.");
-
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
         return "login";
     }
     
@@ -144,26 +157,37 @@ public class UserController {
     }
     
     @RequestMapping(value = "seller/products/add", method = RequestMethod.POST)
-    public String addProduct(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult){
+    public String addProduct(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
+    		Model model){
     	
-    	CommonsMultipartFile photo = product.getPhoto();
-    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    	String fileNameGen = "img"+ username+product.getName().replaceAll("\\s+","")+ Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis()+".jpeg";
-    	product.setFilepath(fileNameGen);
-    	File file = new File("C:/auctionSiteImages", fileNameGen);
+    	System.out.println("product id:" + product.getId());
     	try {
+    		productValidator.validate(product, bindingResult);
+    		if(bindingResult.hasErrors()) {
+    			return "addProduct";
+    		}
+	    	CommonsMultipartFile photo = product.getPhoto();
+	    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+	    	String fileNameGen = "img"+ username+product.getName().replaceAll("\\s+","")+ Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis()+".jpeg";
+	    	product.setFilepath(fileNameGen);
+	    	File file = new File("C:/auctionSiteImages", fileNameGen);
 			photo.transferTo(file);
+			product.setCategory(sellerService.getCategory(cat));
+	    	List<Product> ans = new ArrayList<Product>();
+	    	ans.add(product);
+	    	sellerService.updateProducts(username, ans);
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    	product.setCategory(sellerService.getCategory(cat));
-    	List<Product> ans = new ArrayList<Product>();
-    	ans.add(product);
-    	sellerService.updateProducts(username, ans);
-    	
-    	return "redirect:/seller/homepage";
+    	catch (Exception e) {
+    		e.printStackTrace();
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
+    	model.addAttribute("message", "Successfully added product");
+    	return "seller_home";
     }
     
     
@@ -173,10 +197,11 @@ public class UserController {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
     	boolean ans = sellerService.deleteProductById(username, id);
     	if(ans) {
-    		return "redirect:/seller/homepage";
+    		model.addAttribute("message", "Succesfully deleted product");
+    		return "seller_home";
     	}
     	model.addAttribute("message", "Failed to Delete the resource");
-    	return "redirect:/error";
+    	return "error";
     }
     
     
@@ -189,6 +214,55 @@ public class UserController {
     	return "view_products";
     }
     
+    
+    
+    @RequestMapping(value = "/seller/products/edit/{product.name}/{product.id}", method = RequestMethod.POST)
+    public String editSellerProduct(@RequestParam("editProductId") int id, Model model) {
+    	
+    	try {
+    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	Product prod = sellerService.getProductById(username, id);
+    	model.addAttribute("product", prod);
+    	model.addAttribute("categories", sellerService.getAllCategories());
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+    	}
+    	return "seller-edit-product";
+    }
+    
+    @RequestMapping(value = "seller/products/edit/confirm", method = RequestMethod.POST)
+    public String editProductConfirm(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
+    		Model model){
+    	
+    	System.out.println("product id:" + product.getId());
+    	try {
+    		productValidator.validate(product, bindingResult);
+    		if(bindingResult.hasErrors()) {
+    			return "seller-edit-product";
+    		}
+	    	CommonsMultipartFile photo = product.getPhoto();
+	    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+	    	String fileNameGen = "img"+ username+product.getName().replaceAll("\\s+","")+ Calendar.getInstance(TimeZone.getDefault()).getTimeInMillis()+".jpeg";
+	    	product.setFilepath(fileNameGen);
+	    	File file = new File("C:/auctionSiteImages", fileNameGen);
+			photo.transferTo(file);
+			product.setCategory(sellerService.getCategory(cat));
+	    	sellerService.updateProducts(username, product);
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    	catch (Exception e) {
+    		e.printStackTrace();
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
+    	model.addAttribute("message", "Successfully edited product");
+    	return "view_products";
+    }
     
     
     @RequestMapping(value = {"/", "/welcome", "/home"}, method = RequestMethod.GET)

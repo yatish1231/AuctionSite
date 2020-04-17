@@ -75,7 +75,7 @@
 		var nameField = document.getElementById("typeSelect");
 		var social = document.getElementById("social");
 		nameField.addEventListener("click", function(){
-		  //Update this to your logic...
+		  
 		  if(document.getElementById("typeSelect").value === "ROLE_SELLER"){
 		    social.disabled = false;
 		  }

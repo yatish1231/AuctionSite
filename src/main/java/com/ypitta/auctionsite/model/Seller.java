@@ -9,6 +9,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Cascade;
+
 @Entity
 @Table(name = "sellers")
 @PrimaryKeyJoinColumn(name = "id")
@@ -17,7 +19,7 @@ public class Seller extends User{
 	@Column(name = "social_id", nullable = false)
 	private String social_id;
 	
-	@OneToMany(mappedBy = "seller", orphanRemoval = true, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "seller", orphanRemoval = true,cascade = CascadeType.ALL)
 	private List<Product> products;
 
 	public String getSocial_id() {

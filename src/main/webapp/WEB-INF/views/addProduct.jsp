@@ -57,42 +57,47 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <div class="w3-section w3-bottombar w3-padding-16">
       <span class="w3-margin-right">Filter:</span> 
       <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Design</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Photos</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Art</button>
+      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
     </div>
     </div>
   </header>
   
-  <div class="container">
+  <div class="w3-container w3-centre w3-padding-large">
 
-    <form:form method="POST" modelAttribute="product" class="form-signin" enctype="multipart/form-data">
+    <form:form name="productForm" method="POST" modelAttribute="product" class="form-signin" onsubmit="return validate()" enctype="multipart/form-data">
         <h2 class="form-signin-heading">Add your product</h2>
         
         <spring:bind path="name">
-            <div class="form-group">
-                <form:input type="text" path="name" class="form-control"
-                            placeholder="Name"></form:input>
+            <div class="w3-centre">
+                <form:input type="text" path="name" class="w3-input"
+                            placeholder="Name" ></form:input>
+                            <form:errors path="name"></form:errors>
             </div>
         </spring:bind>
         
         <spring:bind path="price">
-            <div class="form-group">
-                <form:input type="text" path="price" class="form-control"
-                            placeholder="Price:"></form:input>
+            <div class="w3-centre">
+                <form:input type="text" path="price" class="w3-input"
+                            placeholder="Price:" ></form:input>
+                            <form:errors path="price"></form:errors>
             </div>
         </spring:bind>
         <spring:bind path="photo">
-            <div class="form-group">
-                <form:input type="file" path="photo" class="form-control"
-                            placeholder="Picture:"></form:input>
+            <div class="w3-centre">
+                <form:input type="file" path="photo" class="w3-input"
+                            placeholder="Picture:" ></form:input>
+                            <form:errors path="photo"></form:errors>
             </div>
         </spring:bind>
+        <div class="w3-input">
         <c:forEach var="type" items="${requestScope.categories}">
-        <input class="form-group" type="radio" name="cat" value="${type.name}"/>${type.name}
+        <input  type="radio" name="cat" value="${type.name}" /> ${type.name} |
         </c:forEach>
+        </div>
         <input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+        <button class="w3-input w3-btn" type="submit">Submit</button>
     </form:form>
   </div>
   
@@ -116,43 +121,23 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
   <footer class="w3-container w3-padding-32 w3-dark-grey">
   <div class="w3-row-padding">
     <div class="w3-third">
-      <h3>FOOTER</h3>
-      <p>Praesent tincidunt sed tellus ut rutrum. Sed vitae justo condimentum, porta lectus vitae, ultricies congue gravida diam non fringilla.</p>
-      <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+      <h3>Terms and Conditions</h3>
+      <p>User terms and conditions</p>
+      <p>2020 <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank">Auction Website</a></p>
     </div>
   
-    <div class="w3-third">
-      <h3>BLOG POSTS</h3>
-      <ul class="w3-ul w3-hoverable">
-        <li class="w3-padding-16">
-          <img src="/w3images/workshop.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Lorem</span><br>
-          <span>Sed mattis nunc</span>
-        </li>
-        <li class="w3-padding-16">
-          <img src="/w3images/gondol.jpg" class="w3-left w3-margin-right" style="width:50px">
-          <span class="w3-large">Ipsum</span><br>
-          <span>Praes tinci sed</span>
-        </li> 
-      </ul>
-    </div>
 
     <div class="w3-third">
-      <h3>POPULAR TAGS</h3>
+      <h3>POPULAR ITEMS</h3>
       <p>
-        <span class="w3-tag w3-black w3-margin-bottom">Travel</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">New York</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">London</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">IKEA</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">NORWAY</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">DIY</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Ideas</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Baby</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Family</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">News</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Clothing</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Shopping</span>
-        <span class="w3-tag w3-grey w3-small w3-margin-bottom">Sports</span> <span class="w3-tag w3-grey w3-small w3-margin-bottom">Games</span>
+        <span class="w3-tag w3-black w3-margin-bottom">Travel</span>
       </p>
     </div>
 
   </div>
   </footer>
   
-  <div class="w3-black w3-center w3-padding-24">Powered by <a href="https://www.w3schools.com/w3css/default.asp" title="W3.CSS" target="_blank" class="w3-hover-opacity">w3.css</a></div>
-
+<div class="w3-black w3-center w3-padding-24">Project by <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank" class="w3-hover-opacity">Yatish Pitta</a></div>
 <!-- End page content -->
 </div>
 </div>
@@ -168,6 +153,41 @@ function w3_close() {
     document.getElementById("mySidebar").style.display = "none";
     document.getElementById("myOverlay").style.display = "none";
 }
+</script>
+<script type = "text/javascript">
+
+      function validate() {
+      var x = document.forms["productForm"]["price"].value;
+      var y = document.forms["productForm"]["name"].value;
+      var z = document.forms["productForm"]["photo"].value;
+      var c = document.forms["productForm"]["cat"].value;
+         if(x  == "" && y == "" && z == "" && c == "") {
+            alert( "Please fill all fields" );
+            document.productForm.name.focus();
+            return false;
+         }
+         if(x  == "") {
+             alert( "Please enter a price" );
+             document.productForm.price.focus() ;
+             return false;
+          }
+         if(y == "") {
+             alert( "Please enter a name" );
+             document.productForm.name.focus() ;
+             return false;
+          }
+         if(z == "") {
+              alert( "Please add a photo" );
+              document.productForm.photo.focus() ;
+              return false;
+           }
+          if(c == "") {
+              alert( "Please enter a category" );
+              document.productForm.price.focus() ;
+              return false;
+           }
+         return true ;
+      }
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>

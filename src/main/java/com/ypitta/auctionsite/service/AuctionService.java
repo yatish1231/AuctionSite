@@ -29,7 +29,7 @@ public class AuctionService {
 	}
 	
 	public Auction getAuctionByProductId(int name) {
-		return auctionRepostory.getAuctionByProduct(name);
+		return auctionRepostory.getAuction(name);
 	}
 	
 	public String placeBidUsername(String username, int id, Bid bid) {
@@ -39,5 +39,13 @@ public class AuctionService {
 	
 	public List<Bid> getAllBids(int id){
 		return auctionRepostory.getAllBidsForAuction(id);
+	}
+	
+	public List<Bid> getAllUserBids(String username){
+		return auctionRepostory.getUserBids(username);
+	}
+	
+	public Object[] getLatestBid(int auctionId) {
+		return auctionRepostory.getCurrentHighestBid(auctionId);
 	}
 }

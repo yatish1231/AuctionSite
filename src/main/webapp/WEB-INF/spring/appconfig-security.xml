@@ -7,8 +7,8 @@
 
     <http auto-config="true">
         <intercept-url pattern="/" access="hasAnyRole('ROLE_BUYER','ROLE_SELLER')"/>
-        <intercept-url pattern="/seller**" access="hasAnyRole('ROLE_SELLER')"/>
-        <intercept-url pattern="/buyer**" access="hasAnyRole('ROLE_BUYER')"/>
+        <intercept-url pattern="/seller/**" access="hasRole('ROLE_SELLER')"/>
+        <intercept-url pattern="/buyer/**" access="hasRole('ROLE_BUYER')"/>
         <intercept-url pattern="/welcome" access="hasAnyRole('ROLE_BUYER','ROLE_SELLER')"/>
         <form-login login-page="/login" authentication-success-handler-ref="myAuthenticationSuccessHandler" authentication-failure-url="/login?error" username-parameter="username" password-parameter="password"/>
         <logout logout-success-url="/login?logout" />
