@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.ypitta.auctionsite.model.Auction;
 import com.ypitta.auctionsite.model.Bid;
 import com.ypitta.auctionsite.model.Product;
+import com.ypitta.auctionsite.repository.UserRepository;
 import com.ypitta.auctionsite.service.AuctionService;
 import com.ypitta.auctionsite.service.SecurityService;
 import com.ypitta.auctionsite.service.SellerService;
@@ -52,7 +56,7 @@ public class AuctionController {
     @Autowired
     private BidValidator bidValidator;
     
-    
+    private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
     /**
      * Mapping 
      * @param model
@@ -64,7 +68,7 @@ public class AuctionController {
     	
     	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    	System.out.println("id value at request add product to auction form "+id);
+    	_LOGGER.info("id value at request add product to auction form "+id);
     	Product product = sellerService.getProductById(username, id);
     	if(product != null) {
     		Auction auction = new Auction();
@@ -90,7 +94,7 @@ public class AuctionController {
     	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
     	if(auction.getProduct() == null) {
-    		System.out.println("Product Value is null");
+    		_LOGGER.debug("Product Value is null");
     		auction.setStart_time(Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant()));
     		auction.setEnd_time(Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant()));
     		auction.setActive(true);
@@ -98,7 +102,7 @@ public class AuctionController {
     	}
     	sellerService.addProductToAuction(username, id, auction);
     	model.addAttribute("message", "Successfully added product to auction!");
-    	result = "redirect:/seller/homepage";
+    	result = "seller_home";
     	}
     	catch (Exception e) {
     	e.printStackTrace();
@@ -109,6 +113,52 @@ public class AuctionController {
     }
     
     
+    @RequestMapping(value = "seller/auction/update/{productName}/{id}",method = RequestMethod.GET)
+    public String updateAuctionForm(Model model, @PathVariable int id) {
+    	
+    	try {
+    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	_LOGGER.info("edit auction "+id);
+    	Product prod = sellerService.getProductById(username, id);
+    	if(prod != null) {
+    		Auction auction = auctionService.getAuctionByProductId(id);
+    		model.addAttribute("auctionObj", auction);
+    		model.addAttribute("product", prod);
+    		return "auction-edit-form";
+    	}
+    	model.addAttribute("message", "Could not get auction!");
+    	return "error";
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Unknown error occured");
+			return "error";
+		}
+    }
+    
+    @RequestMapping(value = "seller/auction/update/{productName}/{id}",method = RequestMethod.POST)
+    public String updateAuctionFormConfirm(@ModelAttribute("auctionObj") Auction auction, @PathVariable("productName") String prodName,
+        	@RequestParam("startTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime startTime, 
+        	@RequestParam("endTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endTime, @PathVariable int id,
+        	Model model) {
+    try {
+    		auction.setStart_time(Date.from(startTime.atZone(ZoneId.systemDefault()).toInstant()));
+    		auction.setEnd_time(Date.from(endTime.atZone(ZoneId.systemDefault()).toInstant()));
+    		boolean res = auctionService.updateAuction(auction);
+    		if(res) {
+    			model.addAttribute("message", "Successfully updated auction");
+    			return "auction-view-seller";
+    		}
+    		_LOGGER.error("Auction update failed"); 
+    		model.addAttribute("message", "Could not update auction!");
+    		return "error";
+    	}
+    	catch (Exception e) {
+    		
+			model.addAttribute("message", "Unknown error occured");
+			return "error";
+		}
+    }
+    
     @RequestMapping(value = "seller/auction/remove/{productName}/{id}", method = RequestMethod.POST)
     public String removeProductFromAuction(@PathVariable("productName") String name, @PathVariable int id, Model model) {
     	
@@ -117,7 +167,7 @@ public class AuctionController {
     	boolean result = sellerService.removeProductFromAuction(username,id);
     	if(result) {
     		model.addAttribute("message", "Removed product from auction");
-    		return "redirect:/seller/homepage";
+    		return "seller_home";
     	}
     	}
     	catch (Exception e) {
@@ -129,12 +179,13 @@ public class AuctionController {
 		return "error";
     }
     
+    
     @RequestMapping(value = "seller/auction/viewall",method = RequestMethod.GET)
     public String getSellerProductsInAuction(Model model) {
     	try {
     	String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    	List<Product> auctions = sellerService.getAllProductsInAuction(username);
-    	if(auctions!= null) {
+    	List<Auction> auctions = sellerService.getAllProductsInAuction(username);
+    	if(auctions.size() > 0) {
     		model.addAttribute("auctions", auctions);
     		return "auction-view-seller";
     	}
@@ -146,6 +197,32 @@ public class AuctionController {
     	model.addAttribute("message", "No Active Auctions now!!!!");
     	return "auction-view-seller";
     }
+    
+   
+    @RequestMapping(value = "seller/auction/view/bids/{productName}/{id}", method = RequestMethod.GET)
+    public String getAuctionBids(Model model, @PathVariable int id) {
+    	try {
+    	Auction auc = auctionService.getAuctionByProductId(id);
+    	if(!auc.isActive()) {
+    		model.addAttribute("message", "Auction not yet active");
+    		model.addAttribute("startingAt", auc.getStart_time());
+    		return "seller-bid-view";
+    	}
+    	if(auc.getBids().isEmpty()) {
+    		model.addAttribute("auction", auc);
+    		model.addAttribute("message", "No bids placed yet");
+    		return "seller-bid-view";
+    	}
+    	model.addAttribute("auction", auc);
+    	model.addAttribute("placedBids", auc.getBids());
+    	}
+    	catch (Exception e) {
+			model.addAttribute("message", "Error occured");
+			return "error";
+		}
+    	return "seller-bid-view";
+    }
+    
     
     
     /**
@@ -186,9 +263,9 @@ public class AuctionController {
     public String getUserBidPage(Model model, @PathVariable int id) {
     	try {
     	Auction auc = auctionService.getAuctionByProductId(id);
-    	if(auc == null) {
-    		model.addAttribute("message", "Auction does not exist");
-    		return "redirect:/error";
+    	if(!auc.isActive()) {
+    		model.addAttribute("message", "Auction not active");
+    		return "error";
     	}
     	if(auc.getBids().isEmpty()) {
     		model.addAttribute("auction", auc);
@@ -198,7 +275,9 @@ public class AuctionController {
     	}
     	model.addAttribute("auction", auc);
     	model.addAttribute("bidObj", new BidForm());
-    	model.addAttribute("placedBids", auc.getBids());
+    	List<Bid> bids = auc.getBids();
+    	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
+    	model.addAttribute("placedBids", bids);
     	}
     	catch (Exception e) {
 			model.addAttribute("message", "Error occured");

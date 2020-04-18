@@ -8,7 +8,10 @@ import javax.transaction.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import com.ypitta.auctionsite.model.Product;
@@ -16,6 +19,7 @@ import com.ypitta.auctionsite.model.Seller;
 import com.ypitta.auctionsite.model.User;
 import com.ypitta.auctionsite.util.GeneralUtil;
 
+import javassist.NotFoundException;
 import javassist.bytecode.Descriptor.Iterator;
 
 @Repository
@@ -27,6 +31,8 @@ public class ProductsRepositoryImpl implements ProductsRepository{
 	SessionFactory session;
 	
 	private Session session_cur = null;
+	
+	private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
 	
 	private Session getSession() {
         if (session_cur == null || !session_cur.isOpen()) {
@@ -95,6 +101,38 @@ public class ProductsRepositoryImpl implements ProductsRepository{
 		getSession().update(seller_obj);
 		commit();
 		close();
+	}
+
+	
+	@Override
+	public Product getProductById(String username, int id) throws NotFoundException {
+		
+	try {	
+		beginTransaction();
+		Seller seller = (Seller) getSession().get(Seller.class, username);
+		
+		if(seller != null) {
+			Product prod = seller.getProducts().stream().filter(p -> p.getId() == id).findFirst().get();
+			if(prod != null) {
+				commit();
+				close();
+				return prod;
+			}
+			else {
+				commit();
+				close();
+				throw new NotFoundException("Product not found!");
+			}
+		}else {
+			commit();
+			close();
+			throw new UsernameNotFoundException("Seller not found");
+		}
+	}
+	catch (Exception e) {
+		_LOGGER.error(e.getMessage());
+		return null;
+	}
 	}
 
 	@Override

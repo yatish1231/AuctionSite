@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.jaas.AuthorityGranter;
@@ -32,6 +34,7 @@ import com.ypitta.auctionsite.model.Product;
 import com.ypitta.auctionsite.model.Seller;
 import com.ypitta.auctionsite.model.User;
 import com.ypitta.auctionsite.model.UserRole;
+import com.ypitta.auctionsite.repository.UserRepository;
 import com.ypitta.auctionsite.service.AuctionService;
 import com.ypitta.auctionsite.service.LoginSuccessHandlerImpl;
 import com.ypitta.auctionsite.service.SecurityService;
@@ -64,6 +67,8 @@ public class UserController {
     @Autowired
     private addProductValidator productValidator;
     
+    private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
+    
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public String registration(Model model) {
         model.addAttribute("userForm", new User());
@@ -94,20 +99,22 @@ public class UserController {
         		seller.setProducts(new ArrayList<Product>());
         		seller.setSocial_id(social_id);
 				userService.save(seller);
-				securityService.autologin(seller.getUsername(), seller.getPassword());
+				securityService.autologin(userForm.getUsername(), userForm.getPassword());
 				return "redirect:/welcome";
 			}
-        
+        String pass = userForm.getPassword();
 	    UserRole role = new UserRole();
 		role.setRole("ROLE_BUYER");
 		role.setUser(userForm);
 		vals.add(role);
 		userForm.setUserroles(vals);
 	    userService.save(userForm);
-	    
-        securityService.autologin(userForm.getUsername(), userForm.getPassword());
+	    _LOGGER.info("Username: "+userForm.getUsername()+" saved");
+        securityService.autologin(userForm.getUsername(), pass);
     	}
     	catch (Exception e) {
+    		e.printStackTrace();
+    		_LOGGER.error("Error occured while registering user");
 			model.addAttribute("message", "Error has occured");
 			return "error";
 		}
@@ -160,7 +167,7 @@ public class UserController {
     public String addProduct(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
     		Model model){
     	
-    	System.out.println("product id:" + product.getId());
+    	_LOGGER.info("Adding product: " + product.getName());
     	try {
     		productValidator.validate(product, bindingResult);
     		if(bindingResult.hasErrors()) {
@@ -236,7 +243,7 @@ public class UserController {
     public String editProductConfirm(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
     		Model model){
     	
-    	System.out.println("product id:" + product.getId());
+    	
     	try {
     		productValidator.validate(product, bindingResult);
     		if(bindingResult.hasErrors()) {

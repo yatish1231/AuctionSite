@@ -170,6 +170,11 @@ function w3_close() {
              document.auctionForm.price.focus() ;
              return false;
           }
+         if(isNaN(x)){
+             alert( "Price should be a number!" );
+             document.auctionForm.price.focus() ;
+             return false;
+          }
          if(y == "") {
              alert( "Please enter a start time" );
              document.auctionForm.startTime.focus() ;

@@ -1,19 +1,27 @@
 package com.ypitta.auctionsite.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ypitta.auctionsite.model.Auction;
+import com.ypitta.auctionsite.model.Bid;
 import com.ypitta.auctionsite.model.Category;
 import com.ypitta.auctionsite.model.Product;
 import com.ypitta.auctionsite.model.Seller;
 import com.ypitta.auctionsite.repository.AuctionRepository;
 import com.ypitta.auctionsite.repository.CategoryRepository;
 import com.ypitta.auctionsite.repository.ProductsRepository;
+import com.ypitta.auctionsite.repository.UserRepository;
 import com.ypitta.auctionsite.repository.UserRepositoryInterface;
+
+import javassist.NotFoundException;
 
 @Service
 public class SellerService {
@@ -29,6 +37,8 @@ public class SellerService {
 	
 	@Autowired
 	UserRepositoryInterface userRepository;
+	
+	private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
 	
 	public void updateProducts(Seller seller, List<Product> products) {
 		repository.saveOrUpdateProducts(seller, products);
@@ -64,23 +74,20 @@ public class SellerService {
 		
 	}
 	
-	public List<Product> getAllProductsInAuction(String name){
-		List<Product> products = new ArrayList<Product>();
-		Seller seller = (Seller)userRepository.findOne(name);
-		List<Product> prods = seller.getProducts();
-		for (Product product : prods) {
-			if(product.isInAuction()) {
-				products.add(product);
-			}
-		}
-		return products;
+	public List<Auction> getAllProductsInAuction(String name){
+		return auctionRepository.getAllSellerAuctions(name);
 	}
 	
 	public Product getProductById(String user, int id) {
 		
-		Seller seller = (Seller)userRepository.findOne(user);
-		System.out.println("get product by id :" +id);
-		return seller.getProducts().stream().filter(p -> p.getId() == id).findFirst().get();
+		_LOGGER.info("getting product by id : " +id);
+		try {
+			return repository.getProductById(user, id);
+		} catch (NotFoundException e) {
+			
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public void addProductToAuction(String name, int id, Auction auction) {
@@ -101,6 +108,8 @@ public class SellerService {
 		return repository.deleteProduct(username, id);
 			
 	}
+	
+
 	
 }
 	

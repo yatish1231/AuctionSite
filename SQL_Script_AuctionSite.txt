@@ -1,0 +1,66 @@
+CREATE TABLE `auctions` (
+  `id` int(11) NOT NULL,
+  `price` double NOT NULL,
+  `start_time` datetime(6) NOT NULL,
+  `end_time` datetime(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_product` FOREIGN KEY (`id`) REFERENCES `products` (`prod_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `bids` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `price` double NOT NULL,
+  `bid_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `user_name` varchar(45) NOT NULL,
+  `auction_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_user_idx` (`user_name`),
+  KEY `fk_auction_idx` (`auction_id`),
+  CONSTRAINT `fk_auction` FOREIGN KEY (`auction_id`) REFERENCES `auctions` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_user` FOREIGN KEY (`user_name`) REFERENCES `users` (`username`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `categories` (
+  `cat_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`cat_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `products` (
+  `prod_id` int(11) NOT NULL AUTO_INCREMENT,
+  `prod_name` varchar(45) NOT NULL,
+  `seller_id` varchar(45) NOT NULL,
+  `category_id` varchar(45) NOT NULL,
+  `price` decimal(45,0) NOT NULL,
+  `filepath` varchar(100) DEFAULT NULL,
+  `inauction` tinyint(4) DEFAULT NULL,
+  PRIMARY KEY (`prod_id`),
+  KEY `fk_seller_idx` (`seller_id`),
+  KEY `fk_category_idx` (`category_id`),
+  CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`cat_name`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_seller` FOREIGN KEY (`seller_id`) REFERENCES `sellers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `sellers` (
+  `id` varchar(45) NOT NULL,
+  `social_id` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `social_id_UNIQUE` (`social_id`),
+  CONSTRAINT `fk_userId` FOREIGN KEY (`id`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `user_roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `role` varchar(45) NOT NULL,
+  `user_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId_idx` (`user_name`),
+  CONSTRAINT `userId` FOREIGN KEY (`user_name`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+CREATE TABLE `users` (
+  `username` varchar(45) NOT NULL,
+  `password` varchar(90) NOT NULL,
+  `firstname` varchar(45) NOT NULL,
+  `lastname` varchar(45) NOT NULL,
+  PRIMARY KEY (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

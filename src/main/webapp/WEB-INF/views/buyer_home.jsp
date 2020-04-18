@@ -79,13 +79,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <p></p>
     <hr>
     
-    <h4>Sales--</h4>
-    <!-- Progress bars / Skills -->
-    <p>Percentage sales</p>
-    <div class="w3-grey">
-      <div class="w3-container w3-dark-grey w3-padding w3-center" style="width:65%">65%</div>
-    </div>
-    <hr>
+
     
 
   <!-- Footer -->

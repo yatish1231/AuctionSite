@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<%@page import="java.text.DateFormat"%>
-<%@page import="org.springframework.format.annotation.DateTimeFormat"%>
-<%@page import="com.ypitta.auctionsite.model.Auction"%>
-<%@ taglib prefix = "fmt" uri = "http://java.sun.com/jsp/jstl/fmt" %>
 <html>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<title>View Auction Seller</title>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<title>Seller Add Products</title>
 <meta charset="UTF-8">
+<meta name="_csrf" content="${_csrf.token}"/>
+<!-- default header name is X-CSRF-TOKEN -->
+<meta name="_csrf_header" content="${_csrf.headerName}"/>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="${contextPath}/resources/css/bootstrap.min.css" rel="stylesheet">
+<link href="${contextPath}/resources/css/common.css" rel="stylesheet">
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
@@ -58,61 +60,64 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
       <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
       <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
       <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Electronics</button>
     </div>
     </div>
   </header>
   
-  <!-- First Photo Grid-->
-  <div class="w3-row-padding">
-  <c:forEach var="auc" items="${requestScope.auctions}"> 
-    <div class="w3-third w3-container w3-margin-bottom">
-      <img src="/imagefolder/${auc.product.filepath}" alt="Norway" style="width:100%" class="w3-hover-opacity">
-      <div class="w3-container w3-white">
-        <p><b>${auc.product.name}</b></p>
-        <p><b>Product price: ${auc.product.price}</b></p>
-        <p><b>Auction starting price: ${auc.price}</b></p>
-        <p><b>${auc.product.category.name}</b></p>
-        <p><b>Starting date: <fmt:formatDate type = "both" value = "${auc.start_time}"/></b></p>
-        <p><b>Ending date: <fmt:formatDate type = "both" value = "${auc.end_time}"/></b></p>
-        <form id="deleteForm/${auc.product.name}/${auc.product.id}" method="POST" action="${contextPath}/seller/auction/remove/${auc.product.name}/${auc.product.id}">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-            <button type="submit" class="w3-bar-item w3-button w3-padding">Remove from Auction</button>
-        </form>
-       <a href="${contextPath}/seller/auction/update/${auc.product.name}/${auc.product.id}" class="w3-bar-item w3-button w3-padding">Edit Auction</a><br>
-        <a href="${contextPath}/seller/auction/view/bids/${auc.product.name}/${auc.product.id}" class="w3-bar-item w3-button w3-padding">View Bids</a>
-      </div>
-    </div>
-    </c:forEach>
-  </div>
+  <div class="w3-container w3-centre">
 
-  <!-- Pagination -->
-  <div class="w3-center w3-padding-32">
-    <div class="w3-bar">
-      <a href="#" class="w3-bar-item w3-button w3-hover-black">«</a>
-      <a href="#" class="w3-bar-item w3-black w3-button">1</a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-black">2</a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-black">3</a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-black">4</a>
-      <a href="#" class="w3-bar-item w3-button w3-hover-black">»</a>
-    </div>
+    <form:form name="auctionForm" method="POST" modelAttribute="auctionObj" onsubmit="return validate()" class="w3-container w3-centre w3-padding-large">
+     <div class="w3-third w3-container w3-margin-bottom">
+     
+     <h2 class="w3-centre">Add your product to auction</h2>
+      <img src="/imagefolder/${product.filepath}" alt="Norway" style="width:100%" class="w3-hover-opacity">
+      
+        <h3><b>${product.name}</b></h3>
+        <h3><b>Price: ${product.price}</b></h3>
+        <spring:bind path="id">
+        	<form:input type="hidden" path="id"/>
+        </spring:bind>
+        <spring:bind path="price">
+            <div class="w3-centre">
+                <form:input type="text" path="price" class="w3-input"
+                            placeholder="Price"></form:input>
+            </div>
+        </spring:bind>
+        
+            <div class="w3-centre">
+                <input type="datetime-local" name="startTime" class="w3-input"
+                            placeholder="Start date and Time"></input>
+            </div>
+            
+        
+            <div class="w3-centre">
+                <input type="datetime-local" name="endTime" class="w3-input"
+                            placeholder="End date and time"></input>
+            </div>
+            
+        <input type="hidden"  name="${_csrf.parameterName}"   value="${_csrf.token}"/>
+        <button class="w3-input w3-btn" type="submit">Submit</button>
+        </div>
+    </form:form>
   </div>
-
- <div class="w3-container w3-padding-large" style="margin-bottom:32px">
+  
+  <div class="w3-container w3-padding-large" style="margin-bottom:32px">
     <h4><b>About the Website</b></h4>
-    <p>Auction Site by Yatish Pitta</p>
+    <p>Live Auction Website by Yatish Pitta</p>
     <hr>
     
-   <h4>Sales--</h4>
+    <h4>Sales--</h4>
     <!-- Progress bars / Skills -->
     <p>Percentage sales</p>
     <div class="w3-grey">
       <div class="w3-container w3-dark-grey w3-padding w3-center" style="width:65%">65%</div>
     </div>
-    <a href="${contextPath}/seller/auction/viewall" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user fa-fw w3-margin-right"></i>View Live Auctions</a>   
+    <div>
+   <a href="${contextPath}/seller/auction/viewall" class="w3-bar-item w3-button w3-padding"><i class="fa fa-user fa-fw w3-margin-right"></i>View Live Auctions</a>
+   </div>
     <hr>
-
-  <!-- Footer -->
+    
+	<!-- Footer -->
   <footer class="w3-container w3-padding-32 w3-dark-grey">
   <div class="w3-row-padding">
     <div class="w3-third">
@@ -120,7 +125,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
       <p>User terms and conditions</p>
       <p>2020 <a href="https://github.com/yatish1231/AuctionSite.git" target="_blank">Auction Website</a></p>
     </div>
-  
+    
 
     <div class="w3-third">
       <h3>POPULAR ITEMS</h3>
@@ -136,6 +141,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
 <!-- End page content -->
 </div>
 </div>
+
 <script>
 // Script to open and close sidebar
 function w3_open() {
@@ -148,6 +154,45 @@ function w3_close() {
     document.getElementById("myOverlay").style.display = "none";
 }
 </script>
+<script type = "text/javascript">
 
+      function validate() {
+      var x = document.forms["auctionForm"]["price"].value;
+      var y = document.forms["auctionForm"]["startTime"].value;
+      var z = document.forms["auctionForm"]["endTime"].value;
+      
+         if(x  == "" && y == "" && z == "") {
+            alert( "Please fill all fields" );
+            document.auctionForm.price.focus() ;
+            document.auctionForm.startTime.focus() ;
+            document.auctionForm.endTime.focus() ;
+            return false;
+         }
+         if(x  == "") {
+             alert( "Please enter a price" );
+             document.auctionForm.price.focus() ;
+             return false;
+          }
+         if(isNaN(x)){
+             alert( "Price should be a number!" );
+             document.auctionForm.price.focus() ;
+             return false;
+          }
+         if(y == "") {
+             alert( "Please enter a start time" );
+             document.auctionForm.startTime.focus() ;
+             return false;
+          }
+         if(z == "") {
+              alert( "Please add a end time" );
+              document.auctionForm.endTime.focus() ;
+              return false;
+           }
+        
+         return true ;
+      }
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="${contextPath}/resources/js/bootstrap.min.js"></script>
 </body>
 </html>

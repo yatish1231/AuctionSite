@@ -2,7 +2,7 @@
 <html>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<title>W3.CSS Template</title>
+<title>View Auctions</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -51,9 +51,10 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     <div class="w3-section w3-bottombar w3-padding-16">
       <span class="w3-margin-right">Filter:</span> 
       <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Design</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Photos</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Art</button>
+      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
+      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Electronics</button>
     </div>
     </div>
   </header>
@@ -90,14 +91,6 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
   <div class="w3-container w3-padding-large" style="margin-bottom:32px">
     <h4><b>About the Website</b></h4>
     <p></p>
-    <hr>
-    
-    <h4>Sales--</h4>
-    <!-- Progress bars / Skills -->
-    <p>Percentage sales</p>
-    <div class="w3-grey">
-      <div class="w3-container w3-dark-grey w3-padding w3-center" style="width:65%">65%</div>
-    </div>
     <hr>
 
   <!-- Footer -->

@@ -41,6 +41,13 @@ public interface AuctionRepository {
 	 */
 	public void addAuction(Auction auction, int product_name);
 	
+	
+	/**
+	 * Update auction information
+	 * @param auction
+	 * @return
+	 */
+	public boolean updateAuction(Auction auction);
 	/**
 	 * get auction by using product/auction id
 	 * @param id
@@ -54,6 +61,14 @@ public interface AuctionRepository {
 	 */
 	public List<Auction> getAllActiveAuctions();
 	
+	
+	/**
+	 * 
+	 * @param sellername
+	 * @return
+	 */
+	public List<Auction> getAllSellerAuctions(String sellername);
+ 	
 	/**
 	 * get all inactive auctions
 	 * @return

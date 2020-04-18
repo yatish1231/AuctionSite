@@ -171,6 +171,11 @@ function w3_close() {
              document.productForm.price.focus() ;
              return false;
           }
+         if(isNaN(x)){
+             alert( "Price should be a number!" );
+             document.productForm.price.focus() ;
+             return false;
+          }
          if(y == "") {
              alert( "Please enter a name" );
              document.productForm.name.focus() ;

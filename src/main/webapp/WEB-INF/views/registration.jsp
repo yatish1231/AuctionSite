@@ -30,7 +30,7 @@
 
 <div class="container">
 
-    <form:form method="POST" modelAttribute="userForm" class="form-signin">
+    <form:form name="regForm" method="POST" modelAttribute="userForm" onsubmit="return validate()" class="form-signin">
         <h2 class="form-signin-heading">Create your account</h2>
         
         <spring:bind path="firstname">
@@ -61,11 +61,11 @@
                 <form:errors path="password"></form:errors>
             </div>
         </spring:bind>
-        
+        <input class="form-control" type="password" name="passCheck" placeholder="Re-enter password"/><br>
 		<input class="form-group" type="radio" name="type" id="typeSelect" value="ROLE_SELLER"/>Seller 
 		<input class="form-group" type="radio" name="type" id="typeSelect" value="ROLE_BUYER"/>Buyer <br/>
-		<label for="social">Social Id </label>
-		<input class="form-group" type="text" id="social" name="social_id" disabled/>
+		
+		<input class="form-control" type="text" id="social" name="social_id" placeholder="Social Id" disabled/>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
     </form:form>
 
@@ -83,6 +83,67 @@
 			  social.disabled = true;
 		  }
 		});
+</script>
+<script type = "text/javascript">
+
+      function validate() {
+      var x = document.forms["regForm"]["firstname"].value;
+      var y = document.forms["regForm"]["lastname"].value;
+      var z = document.forms["regForm"]["username"].value;
+      var c = document.forms["regForm"]["password"].value;
+      var d = document.forms["regForm"]["type"].value;
+      var e = document.forms["regForm"]["passCheck"].value;
+      var f = document.forms["regForm"]["social_id"].value;
+      
+         if(x  == "" && y == "" && z == "" && c == "") {
+            alert( "Please fill all fields" );
+            document.regForm.firstname.focus();
+            return false;
+         }
+         if(x  == "") {
+             alert( "Please enter first name" );
+             document.regForm.firstname.focus() ;
+             return false;
+          }
+         if(y == "") {
+             alert( "Please enter last name" );
+             document.regForm.lastname.focus() ;
+             return false;
+          }
+         if(z == "") {
+              alert( "Please choose a user-name " );
+              document.regForm.username.focus() ;
+              return false;
+           }
+          if(c == "") {
+              alert( "Please choose a password" );
+              document.regForm.password.focus() ;
+              return false;
+           }
+          if(e == "") {
+              alert( "Please re enter password" );
+              document.regForm.passCheck.focus() ;
+              return false;
+           }
+          if(c != e) {
+              alert( "Passwords don't match!" );
+              document.regForm.passCheck.focus() ;
+              return false;
+           }
+          if(d == ""){
+        	  alert("Please Select a role!")
+        	  document.regForm.type.focus() ;
+              return false;          
+          }
+          if( d == "ROLE_SELLER"){
+        		if( f == ""){
+        			alert("Seller role - Please enter your social id")
+              	  	document.regForm.social_id.focus() ;
+                    return false;
+        		}  
+          }
+         return true ;
+      }
 </script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script src="${contextPath}/resources/js/bootstrap.min.js"></script>

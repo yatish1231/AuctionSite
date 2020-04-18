@@ -173,13 +173,18 @@ function w3_close() {
             document.productForm.cat.focus() ;
             return false;
          }
-         if(x  == "") {
+         if(y  == "") {
              alert( "Please enter a name" );
              document.productForm.name.focus() ;
              return false;
           }
-         if(y == "") {
+         if(x == "") {
              alert( "Please enter a price" );
+             document.productForm.price.focus() ;
+             return false;
+          }
+         if(isNaN(x)){
+             alert( "Price should be a number!" );
              document.productForm.price.focus() ;
              return false;
           }
@@ -190,7 +195,7 @@ function w3_close() {
            }
           if(c == "") {
               alert( "Please enter a category" );
-              document.productForm.cat.focus() ;
+              document.productForm.price.focus() ;
               return false;
            }
          return true ;

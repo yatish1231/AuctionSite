@@ -1,5 +1,6 @@
 package com.ypitta.auctionsite.service;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,10 @@ public class AuctionService {
 		return auctionRepostory.getAllActiveAuctions();
 	}
 	
+	public boolean updateAuction(Auction auction) {
+		return auctionRepostory.updateAuction(auction);
+	}
+	
 	public Auction getAuctionByProductId(int name) {
 		return auctionRepostory.getAuction(name);
 	}
@@ -48,4 +53,13 @@ public class AuctionService {
 	public Object[] getLatestBid(int auctionId) {
 		return auctionRepostory.getCurrentHighestBid(auctionId);
 	}
+	
+
+	public static class sortBids implements Comparator<Bid>{
+			@Override
+			public int compare(Bid o1, Bid o2) {
+				return Double.compare(o1.getPrice(), o2.getPrice());	
+		}
+	}
+	
 }

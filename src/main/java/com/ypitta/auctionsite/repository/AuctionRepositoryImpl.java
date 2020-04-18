@@ -2,9 +2,12 @@ package com.ypitta.auctionsite.repository;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -17,6 +20,7 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import com.ypitta.auctionsite.model.Auction;
@@ -117,15 +121,37 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 		close();
 	}
 
+	
+	
+	@Override
+	public boolean updateAuction(Auction auction) {
+		try {
+		beginTransaction();
+		Auction auction_obj = (Auction) getSession().get(Auction.class,auction.getId());
+		auction_obj.setPrice(auction.getPrice());
+		auction_obj.setStart_time(auction.getStart_time());
+		auction_obj.setEnd_time(auction.getEnd_time());
+		getSession().update(auction_obj);
+		commit();
+		close();
+		return true;
+		}
+		catch (Exception e) {
+			commit();
+			close();
+			_LOGGER.error(e.getMessage());
+		}
+		return false;
+	}
+
 	@Override
 	public Auction getAuction(int id) {
 		_LOGGER.info("get auction by id: "+id);
 		Auction auc = (Auction)getSession().get(Auction.class, id);
 		if(auc != null) {
-		if(auc.isActive()) {
+			_LOGGER.debug("Auction found -- retrieved");
 			return auc;
-		}
-		_LOGGER.debug("Auction is not active!");
+		
 		}
 		_LOGGER.debug("Auction instace not found: Null value");
 		return null;
@@ -149,6 +175,30 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 		}
 		_LOGGER.debug("No active auctions found");
 		return null;
+	}
+
+	
+	@Override
+	public List<Auction> getAllSellerAuctions(String sellername) {
+		beginTransaction();
+		Seller seller_obj = (Seller) getSession().get(Seller.class, sellername);
+		if(seller_obj != null) {
+		List<Integer> active_ids = seller_obj.getProducts().stream().filter(p -> p.isInAuction() == true).map(Product::getId).collect(Collectors.toList());
+		if(active_ids.size() > 0) {
+		List<Auction> active = (List<Auction>) getSession().createCriteria(Auction.class).add(Restrictions.in("id", active_ids)).list();
+		commit();
+		close();
+		return active;
+		}
+		commit();
+		close();
+		_LOGGER.debug("No auctions yet seller: "+ sellername);
+		return new ArrayList<Auction>();
+		}
+		commit();
+		close();
+		throw new UsernameNotFoundException("Seller not found!");
+		
 	}
 
 	@Override
@@ -249,7 +299,19 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 		if(auc == null) {
 			return null;
 		}
-		return new ArrayList<Bid>(auc.getBids());
+		List<Bid> bids = new ArrayList<Bid>(auc.getBids());
+		Collections.sort(bids, Collections.reverseOrder( new Comparator<Bid>() {
+
+			@Override
+			public int compare(Bid o1, Bid o2) {
+				
+				return Double.compare(o1.getPrice(), o2.getPrice());
+			}
+			
+		}));
+		_LOGGER.info("Printing bids......");
+		bids.stream().map(p -> p.getPrice()).forEach(System.out::println);
+		return bids;
 	}
 
 	@Override

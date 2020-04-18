@@ -5,6 +5,8 @@ import java.util.List;
 import com.ypitta.auctionsite.model.Product;
 import com.ypitta.auctionsite.model.Seller;
 
+import javassist.NotFoundException;
+
 
 /**
  * Interface for product repository
@@ -35,6 +37,14 @@ public interface ProductsRepository {
 	public void saveOrUpdateProducts(String seller, Product product);
 	
 	/**
+	 * 
+	 * @param username
+	 * @param id
+	 * @return
+	 */
+	public Product getProductById(String username, int id) throws NotFoundException;
+	
+	/**
 	 * Get all products of the seller by passing seller username
 	 * @param name_seller
 	 * @return
@@ -62,5 +72,6 @@ public interface ProductsRepository {
 	 * @return
 	 */
 	public boolean deleteProduct(String username, int id);
+	
 	
 }

@@ -19,7 +19,7 @@ public class GeneralUtil {
 	  
 	        // Add each element of iterator to the List 
 	        iterator.forEachRemaining(list::add); 
-	  
+	        
 	        // Return the List 
 	        return list; 
 	    } 

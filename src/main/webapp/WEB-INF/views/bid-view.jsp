@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<%@page import="java.util.Date"%>
+<%@page import="org.springframework.web.context.request.RequestScope"%>
 <html>
 <head>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
@@ -11,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+
 <style>
 body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 </style>
@@ -72,6 +75,10 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 		<div class="w3-left-align"><h2>${requestScope.auction.product.name}</h2></div>
 		<div class="w3-left-align"><h4>Product Id: <b>${requestScope.auction.product.id}</b></h4></div>
 		<div class="w3-left-align"><h4>Starting Price: <b>${requestScope.auction.product.price}</b></h4></div>
+		<div class="w3-left-align"><h4>Auction started on: <b>${requestScope.auction.start_time}</b></h4></div>
+		<div class="w3-left-align"><h4>Auction ends in: <b id="auctionTimer"></b></h4></div>
+		<script type="text/javascript"> var end_time_js = "${requestScope.auction.end_time}"</script>
+		<script type="text/javascript" src="${contextPath}/resources/js/countDownTimer.js"></script>
 		<div class="w3-container">
 		<form:form name="mybidform" method="POST" modelAttribute="bidObj" onsubmit="return validate()" action="${contextPath}/buyer/auction/bid/${requestScope.auction.product.name}/${requestScope.auction.product.id}" class="w3-container w3-centre w3-padding-large">
         <h3 class="w3-centre">Place Bid</h3>
@@ -135,13 +142,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
     <p></p>
     <hr>
     
-    <h4>Sales--</h4>
-    <!-- Progress bars / Skills -->
-    <p>Percentage sales</p>
-    <div class="w3-grey">
-      <div class="w3-container w3-dark-grey w3-padding w3-center" style="width:65%">65%</div>
-    </div>
-    
+   
 
   <!-- Footer -->
     <footer class="w3-container w3-padding-32 w3-dark-grey">
@@ -179,7 +180,6 @@ function w3_close() {
 }
 </script>
 <script type = "text/javascript">
-
       function validate() {
       var x = document.forms["mybidform"]["price"].value;
          if( x  == "" ) {
@@ -187,6 +187,11 @@ function w3_close() {
             document.mybidform.price.focus() ;
             return false;
          }
+         if(isNaN(x)){
+             alert( "Price should be a number!" );
+             document.mybidform.price.focus() ;
+             return false;
+          }
          if( x < ${requestScope.auction.product.price} ) {
             alert( "Price below minimum" );
             document.mybidform.price.focus() ;
