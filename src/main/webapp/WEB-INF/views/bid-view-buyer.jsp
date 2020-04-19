@@ -50,11 +50,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
     <div class="w3-container">
     <h1><b>Live Auction Website</b></h1>
     <div class="w3-section w3-bottombar w3-padding-16">
-      <span class="w3-margin-right">Filter:</span> 
-      <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
+      
     </div>
     </div>
   </header>
@@ -65,6 +61,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 		<thead>
 		 <tr class="w3-light-grey">
 			<th>Product name</th>
+			<th>Seller</th>
 			<th>Time</th>
 			<th>Price</th>
 			</tr>
@@ -72,7 +69,8 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 		<tbody>
 		<c:forEach var="bid" items="${requestScope.userBids}">
 			<tr>
-			<td>${bid.auction.product.name}</td>
+			<td><a href="${contextPath}/buyer/auction/bid/placed/${bid.auction.product.name}/${bid.auction.product.id}" class="w3-button w3-indigo">${bid.auction.product.name}</a></td>
+			<td>${bid.auction.product.seller.username}</td>
 			<td>${bid.bid_time}</td>
 			<td>${bid.price}</td>
 			</tr>

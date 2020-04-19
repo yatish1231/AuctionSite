@@ -203,18 +203,39 @@ public class AuctionController {
     public String getAuctionBids(Model model, @PathVariable int id) {
     	try {
     	Auction auc = auctionService.getAuctionByProductId(id);
+    	if(auc.isFinished()) {
+    		if(!auc.getBids().isEmpty()) {
+    			Bid max_bid = Collections.max(auc.getBids(), new AuctionService.sortBids());
+    			model.addAttribute("auction", auc);
+		    	List<Bid> bids = auc.getBids();
+		    	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
+		    	model.addAttribute("placedBids", bids);
+		    	model.addAttribute("winning_user", max_bid.getUser());
+		    	model.addAttribute("auc_finished", true);
+		    	return "seller-bid-view";
+    		}
+    		model.addAttribute("auction", auc);
+    		model.addAttribute("message", "This auction has ended with no bids placed!");
+    		model.addAttribute("auc_finished", false);
+    		return "seller-bid-view";
+    	}
     	if(!auc.isActive()) {
     		model.addAttribute("message", "Auction not yet active");
     		model.addAttribute("startingAt", auc.getStart_time());
+    		model.addAttribute("auc_finished", false);
     		return "seller-bid-view";
     	}
     	if(auc.getBids().isEmpty()) {
     		model.addAttribute("auction", auc);
     		model.addAttribute("message", "No bids placed yet");
+    		model.addAttribute("auc_finished", false);
     		return "seller-bid-view";
     	}
     	model.addAttribute("auction", auc);
-    	model.addAttribute("placedBids", auc.getBids());
+    	List<Bid> bids = auc.getBids();
+    	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
+    	model.addAttribute("placedBids", bids);
+    	model.addAttribute("auc_finished", false);
     	}
     	catch (Exception e) {
 			model.addAttribute("message", "Error occured");
@@ -275,6 +296,8 @@ public class AuctionController {
     	}
     	model.addAttribute("auction", auc);
     	model.addAttribute("bidObj", new BidForm());
+    	Bid max_bid = Collections.max(auc.getBids(), new AuctionService.sortBids());
+    	model.addAttribute("currentMaxBid", max_bid);
     	List<Bid> bids = auc.getBids();
     	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
     	model.addAttribute("placedBids", bids);
@@ -310,4 +333,50 @@ public class AuctionController {
     		return getUserBidPage(model, id);
     }
     
+    @RequestMapping(value = "buyer/auction/bid/placed/{productName}/{id}", method = RequestMethod.GET)
+    public String getPlacedUserBidView(@PathVariable int id, @PathVariable("productName") String prodName ,Model model) {
+    	try {
+    	String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    	Auction auc = auctionService.getAuctionByProductId(id);
+    	if(auc == null) {
+    		model.addAttribute("message", "Auction not found");
+    		return "error";
+    	}
+    	if(auc.isActive()) {
+    		return "redirect:/buyer/auction/bid/"+prodName+"/"+String.valueOf(id);
+    	}
+    	if(auc.isFinished()) {
+    		if(!auc.getBids().isEmpty()) {
+    			Bid max_bid = Collections.max(auc.getBids(), new AuctionService.sortBids());
+    			if(max_bid.getUser().getUsername().equalsIgnoreCase(username)) {
+    				model.addAttribute("auction", auc);
+    		    	List<Bid> bids = auc.getBids();
+    		    	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
+    		    	model.addAttribute("placedBids", bids);
+    		    	model.addAttribute("activateAddToCart", true);
+    		    	model.addAttribute("congrats", "Congratulation you've won the auction!");
+    		    	return "buyer-auction-finished";
+    			}else {
+    				model.addAttribute("auction", auc);
+    		    	List<Bid> bids = auc.getBids();
+    		    	Collections.sort(bids, Collections.reverseOrder(new AuctionService.sortBids()));
+    		    	model.addAttribute("placedBids", bids);
+    		    	model.addAttribute("sorrymsg", "Another user has won the auction!");
+    		    	model.addAttribute("activateAddToCart", false);
+    		    	return "buyer-auction-finished";
+    			}
+    		}
+    		model.addAttribute("auction", auc);
+    		model.addAttribute("message", "This auction has ended with no bids placed!");
+    		return "buyer-auction-finished";	
+    	}
+      }catch (Exception e) {
+    	  e.printStackTrace();
+    	  _LOGGER.info("Error occured: "+e.getMessage());
+		model.addAttribute("message", "An error has occured");
+		return "error";
+	}
+    model.addAttribute("message", "Auction not finished: Error");
+    return "buyer_home";
+    }
 }

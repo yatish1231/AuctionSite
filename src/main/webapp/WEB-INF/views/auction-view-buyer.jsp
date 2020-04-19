@@ -59,12 +59,13 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
     </div>
   </header>
   <c:if test="${requestScope.message != null}"><h2>${requestScope.message}</h2></c:if>
-  
   <c:if test="${requestScope.auctions != null}">
-	<div class="w3-row-padding">
-	  <c:forEach var="auction" items="${requestScope.auctions}"> 
+  <c:set var="itemCountx" value="0"/>
+  <c:set var="itemCounty" value="0"/>
+  <c:forEach var="auction" items="${requestScope.auctions}">
+	<c:if test="${itemCountx == 0}"><c:set var="itemCountx" value="1"/><div class="w3-row-padding"></c:if> 
 	    <div class="w3-third w3-container w3-margin-bottom">
-	      <img src="/imagefolder/${auction.product.filepath}" alt="Norway" style="width:100%" class="w3-hover-opacity">
+	      <img src="/imagefolder/${auction.product.filepath}" alt="Norway" style="width:100%" class="w3-hover-opacity w3-card-4">
 	      <div class="w3-container w3-white">
 	        <p><b>${auction.product.name}</b></p>
 	        <p><b>${auction.product.price}</b></p>
@@ -73,8 +74,10 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
 	        <a href="${contextPath}/buyer/auction/bid/${auction.product.name}/${auction.product.id}" class="w3-bar-item w3-button w3-padding">Place bid now</a>
 	      </div>
 	    </div>
-	    </c:forEach>
-	  </div>
+	    <c:set var="itemCounty" value="${itemCounty+1}"/>
+	  <c:if test="${itemCounty == 3}"><c:set var="itemCountx" value="0"/><c:set var="itemCounty" value="0"/></div></c:if>
+	  </c:forEach>
+	  <c:if test="${itemCounty < 3}"></div></c:if>
 	</c:if>
   <!-- Pagination -->
   <div class="w3-center w3-padding-32">

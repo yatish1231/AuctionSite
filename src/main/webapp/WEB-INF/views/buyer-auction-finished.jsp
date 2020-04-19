@@ -60,7 +60,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
     </div>
     </div>
   </header>
-  <c:if test="${requestScope.message != null}"><div class="w3-panel w3-yellow"><h2>${requestScope.message}</h2></div></c:if>
+  <c:if test="${requestScope.message != null}"><h2>${requestScope.message}</h2></c:if>
   <div class="w3-container w3-centre w3-padding-large">
   <c:if test="${requestScope.auction != null}">
   		<div class="w3-cell-row">
@@ -70,35 +70,23 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
   		<div class="w3-cell w3-padding"> 
 		<div class="w3-left-align"><h2>${requestScope.auction.product.name}</h2></div>
 		<div class="w3-left-align"><h4>Product Id: <b>${requestScope.auction.product.id}</b></h4></div>
-		<div class="w3-left-align"><h4>Seller: <b>${requestScope.auction.product.seller.username}</b></h4></div>
 		<div class="w3-left-align"><h4>Starting Price: <b>${requestScope.auction.product.price}</b></h4></div>
 		<div class="w3-left-align"><h4>Auction started on: <b>${requestScope.auction.start_time}</b></h4></div>
-		<div class="w3-left-align"><h4>Auction ends in: <b id="auctionTimer"></b></h4></div>
-		<script type="text/javascript"> var end_time_js = "${requestScope.auction.end_time}"</script>
-		<script type="text/javascript" src="${contextPath}/resources/js/countDownTimer.js"></script>
-		<div class="w3-panel w3-green"><h4>Current Highest Bid: <b>${requestScope.currentMaxBid.price}</b></h4></div>
-		<div class="w3-container">
-		<form:form name="mybidform" method="POST" modelAttribute="bidObj" onsubmit="return validate()" action="${contextPath}/buyer/auction/bid/${requestScope.auction.product.name}/${requestScope.auction.product.id}" class="w3-container w3-centre w3-padding-large">
-        <h3 class="w3-centre">Place Bid</h3>
-        <spring:bind path="price">
-            <div>
-                <form:input class="w3-input" type="text" path="price"
-                            placeholder="Your Bid $$$" ></form:input>
-                <form:errors path="price"></form:errors>            
-            </div>
-        </spring:bind>
-        <spring:bind path="id" >
-                <form:input type="hidden" path="id"
-                           value="${requestScope.auction.id}" ></form:input>
-                <form:errors path="id"></form:errors>
-        </spring:bind>
-        <spring:bind path="time" >
-                <form:input type="hidden" path="time"
-                           value="<%= new java.util.Date() %>" ></form:input>
-                <form:errors path="time"></form:errors>
-        </spring:bind>
-     <button class="w3-input w3-btn" type="submit" name="placeBid">Place Bid</button>
-	</form:form>
+		<div class="w3-left-align"><h4>Auction ended on: <b>${requestScope.auction.end_time}</b></h4></div>
+	<div class="w3-container">
+	
+	<c:if test="${requestScope.sorrymsg != null}"><div class="w3-panel w3-pale-yellow w3-border"><h3>${requestScope.sorrymsg}</h3></div></c:if>
+	<c:if test="${requestScope.activateAddToCart == true}">
+	<c:if test="${requestScope.congrats != null}">
+	<div class="w3-panel w3-green"><h3>${requestScope.congrats}</h3></div>
+	<form name="sellerContactForm" method="POST" onsubmit="return contactseller()" action="${contextPath}/buyer/auction/seller/info">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="auctionId" value="${requestScope.auction.id}"/>
+            <button type="submit" class="w3-input w3-btn w3-light-blue" name="contactbtn">Contact Seller</button>
+        </form>
+    
+    </c:if>    
+	</c:if>
 	</div>
 	</div>
 	</div>
@@ -196,6 +184,14 @@ function w3_close() {
             return false;
          }
          return true ;
+      }
+</script>
+<script type = "text/javascript">
+
+      function contactseller() {
+    	 alert("Contacted Seller! Await response!");
+    	 document.sellerContactForm.contactbtn.focus();
+    	 return false;
       }
 </script>
 </body>

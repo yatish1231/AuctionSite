@@ -46,6 +46,9 @@ public class Auction {
 	@Transient
 	private boolean isActive;
 	
+	@Transient
+	private boolean isFinished;
+	
 	@OneToMany(mappedBy = "auction", orphanRemoval = true)
 	@Cascade(value = org.hibernate.annotations.CascadeType.ALL)
 	private List<Bid> bids;
@@ -107,7 +110,13 @@ public class Auction {
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	
-	
+
+	public boolean isFinished() {
+		return !isActive() && getEnd_time().before(Calendar.getInstance().getTime());
+	}
+
+	public void setFinished(boolean isFinished) {
+		this.isFinished = isFinished;
+	}
 	
 }

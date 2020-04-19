@@ -184,6 +184,7 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 		Seller seller_obj = (Seller) getSession().get(Seller.class, sellername);
 		if(seller_obj != null) {
 		List<Integer> active_ids = seller_obj.getProducts().stream().filter(p -> p.isInAuction() == true).map(Product::getId).collect(Collectors.toList());
+		_LOGGER.info("active ids: "+ active_ids.toString());
 		if(active_ids.size() > 0) {
 		List<Auction> active = (List<Auction>) getSession().createCriteria(Auction.class).add(Restrictions.in("id", active_ids)).list();
 		commit();
@@ -310,7 +311,7 @@ public class AuctionRepositoryImpl implements AuctionRepository{
 			
 		}));
 		_LOGGER.info("Printing bids......");
-		bids.stream().map(p -> p.getPrice()).forEach(System.out::println);
+		
 		return bids;
 	}
 

@@ -75,7 +75,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", sans-serif}
         <p><b>${auc.product.category.name}</b></p>
         <p><b>Starting date: <fmt:formatDate type = "both" value = "${auc.start_time}"/></b></p>
         <p><b>Ending date: <fmt:formatDate type = "both" value = "${auc.end_time}"/></b></p>
-        <form id="deleteForm/${auc.product.name}/${auc.product.id}" method="POST" action="${contextPath}/seller/auction/remove/${auc.product.name}/${auc.product.id}">
+        <form id="deleteForm/${auc.product.name}/${auc.product.id}" method="POST" onsubmit="return validate()" action="${contextPath}/seller/auction/remove/${auc.product.name}/${auc.product.id}">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <button type="submit" class="w3-bar-item w3-button w3-padding">Remove from Auction</button>
         </form>
@@ -148,6 +148,17 @@ function w3_close() {
     document.getElementById("myOverlay").style.display = "none";
 }
 </script>
+<script type = "text/javascript">
 
+      function validate() {
+    	  if (confirm('Are you sure you want to delete this auction?')) {
+    		  return true;
+    		  
+    		} else {
+    		  return false;
+    		  
+    		}
+      }
+</script>
 </body>
 </html>

@@ -54,18 +54,13 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
     <div class="w3-container">
     <h1><b>Live Auction Website</b></h1>
     <div class="w3-section w3-bottombar w3-padding-16">
-      <span class="w3-margin-right">Filter:</span> 
-      <button class="w3-button w3-black">ALL</button>
-      <button class="w3-button w3-white"><i class="fa fa-diamond w3-margin-right"></i>Cars</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-photo w3-margin-right"></i>Furniture</button>
-      <button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Musical Instruments</button>
     </div>
     </div>
   </header>
-  <c:if test="${requestScope.message != null}"><h2>${requestScope.message}</h2></c:if>
-  <c:if test="${requestScope.startingAt != null}"><h2>Auction starting in: <b id="auctionTimer"></b></h2></c:if>
+  <c:if test="${requestScope.message != null}"><div class="w3-panel w3-pale-yellow"><h2>${requestScope.message}</h2></div></c:if>
+  <c:if test="${requestScope.startingAt != null}"><div class="w3-panel w3-green"><h2>Auction starting in: <b id="auctionTimer"></b></h2></div>
   <script type="text/javascript"> var end_time_js = "${requestScope.startingAt}"</script>
-  <script type="text/javascript" src="${contextPath}/resources/js/countDownTimer.js"></script>
+  <script type="text/javascript" src="${contextPath}/resources/js/countDownTimer.js"></script></c:if>
   <div class="w3-container w3-centre w3-padding-large">
   <c:if test="${requestScope.auction != null}">
   		<div class="w3-cell-row">
@@ -75,9 +70,30 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
   		<div class="w3-cell w3-padding"> 
 		<div class="w3-left-align"><h2>${requestScope.auction.product.name}</h2></div>
 		<div class="w3-left-align"><h4>Product Id: <b>${requestScope.auction.product.id}</b></h4></div>
-		<div class="w3-left-align"><h4>Starting Price: <b>${requestScope.auction.product.price}</b></h4></div>
+		<div class="w3-left-align"><h4>Product Price: <b>${requestScope.auction.product.price}</b></h4></div>
+		<div class="w3-left-align"><h4>Starting Price: <b>${requestScope.auction.price}</b></h4></div>
+		<div class="w3-left-align"><h4>Auction started on: <b>${requestScope.auction.start_time}</b></h4></div>
+		<div class="w3-left-align"><h4>Auction ends in: <b id="auctionTimer"></b></h4></div>
+		<script type="text/javascript"> var end_time_js = "${requestScope.auction.end_time}"</script>
+		<script type="text/javascript" src="${contextPath}/resources/js/countDownTimer.js"></script>
 		</div>
 		</div>
+	<c:if test="${requestScope.auc_finished == true}"><div class="w3-panel w3-green">
+	<div class="w3-cell-row">
+		<div class="w3-cell">
+			<h3>Auctioned finished - Highest bidder: ${requestScope.winning_user.username}</h3>
+		</div>
+	<div class="w3-cell">
+	<form name="buyerContactForm" method="POST" onsubmit="return contactbuyer()" action="${contextPath}/buyer/auction/seller/info">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <input type="hidden" name="auctionId" value="${requestScope.auction.product.id}"/>
+            <button type="submit" class="w3-bar-item w3-button w3-padding" name="contactbtn">Contact Buyer</button>
+        </form>
+    </div>
+	</div>
+	</div>
+	</c:if>
+	<div class="w3-container">
 	<table class="w3-table-all">
 		<thead>
 		 <tr class="w3-light-grey">
@@ -96,7 +112,7 @@ body,h1,h2,h3,h4,h5,h6 {font-family: Arial, Helvetica, sans-serif}
 		</c:forEach>
 		</tbody>
 	</table>
-	
+	</div>
 	</c:if>
 	</div>
   <!-- Pagination -->
@@ -161,6 +177,14 @@ function w3_close() {
     document.getElementById("mySidebar").style.display = "none";
     document.getElementById("myOverlay").style.display = "none";
 }
+</script>
+<script type = "text/javascript">
+
+      function contactbuyer() {
+    	 alert("Contacted buyer! Await response!");
+    	 document.buyerContactForm.contactbtn.focus();
+    	 return false;
+      }
 </script>
 </body>
 </html>
