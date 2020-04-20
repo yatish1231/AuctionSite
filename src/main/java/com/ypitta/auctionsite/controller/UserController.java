@@ -43,6 +43,9 @@ import com.ypitta.auctionsite.service.UserService;
 import com.ypitta.auctionsite.validator.UserValidator;
 import com.ypitta.auctionsite.validator.addProductValidator;
 
+/**
+ * Controller for user registration, login and handling seller product operations
+ */
 @Controller
 public class UserController {
 	
@@ -69,13 +72,29 @@ public class UserController {
     
     private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
     
+    /**
+     * GET mapping = /registration
+     * @param model
+     * @return registration form
+     */
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public String registration(Model model) {
         model.addAttribute("userForm", new User());
 
         return "registration";
     }
-
+    
+    /**
+     *POST mapping = /registration
+     * Registration form post handler
+     * Calls form-validator
+     * @param userForm
+     * @param type
+     * @param social_id
+     * @param bindingResult
+     * @param model
+     * @return
+     */
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public String registration(@ModelAttribute("userForm") User userForm, @RequestParam(required = true) String type, @RequestParam(required = false) String social_id, BindingResult bindingResult, Model model) {
         
@@ -121,9 +140,14 @@ public class UserController {
         return "redirect:/welcome";
     }
 
-    
-    
-    
+    /**
+     * GET Mapping = /login
+     * login request handler
+     * @param model
+     * @param error
+     * @param logout
+     * @return /login if not logged in or else /welcome
+     */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(Model model, String error, String logout) {
     	
@@ -146,16 +170,31 @@ public class UserController {
         return "login";
     }
     
+    /**
+     * GET mapping = /seller/homepage
+     * @param model
+     * @return seller homepage
+     */
     @RequestMapping(value = "/seller/homepage", method = RequestMethod.GET)
     public String sellerPage(Model model) {
     	return "seller_home";
     }
     
+    /**
+     * GET mapping = /buyer/homepage
+     * @param model
+     * @return buyer homepage
+     */
     @RequestMapping(value = "/buyer/homepage", method = RequestMethod.GET)
     public String buyerPage(Model model) {
     	return "buyer_home";
     }
 
+    /**
+     * GET mapping = /seller/products/add
+     * @param model
+     * @return add products form
+     */
     @RequestMapping(value = "seller/products/add", method = RequestMethod.GET)
     public String addProductPage(Model model){
     	model.addAttribute("product", new Product());
@@ -163,6 +202,15 @@ public class UserController {
     	return "addProduct";
     }
     
+    /**
+     * POST mapping = /seller/products/add
+     * Adds products to seller account
+     * @param product
+     * @param cat
+     * @param bindingResult
+     * @param model
+     * @return on success - home page, on failure - error page
+     */
     @RequestMapping(value = "seller/products/add", method = RequestMethod.POST)
     public String addProduct(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
     		Model model){
@@ -197,7 +245,15 @@ public class UserController {
     	return "seller_home";
     }
     
-    
+    /**
+     * POST mapping = seller/products/delete/{productName}/{id}
+     * Deletes product from seller account
+     * @param product
+     * @param id
+     * @param bindingResult
+     * @param model
+     * @return on success - seller home page, on failure - error page
+     */
     @RequestMapping(value = "seller/products/delete/{productName}/{id}", method = RequestMethod.POST)
     public String deleteProduct(@ModelAttribute("product") Product product, @PathVariable int id , BindingResult bindingResult, Model model){
     	
@@ -211,7 +267,12 @@ public class UserController {
     	return "error";
     }
     
-    
+    /**
+     * GET mapping = /seller/products/view
+     * Gets all seller products
+     * @param model
+     * @return view products page
+     */
     @RequestMapping(value = "seller/products/view", method = RequestMethod.GET)
     public String viewProducts(Model model) {
     	
@@ -222,7 +283,13 @@ public class UserController {
     }
     
     
-    
+    /**
+     * POST mapping = /seller/products/edit/{product name}/{product id}
+     * Edit product
+     * @param id
+     * @param model
+     * @return edit products form page
+     */
     @RequestMapping(value = "/seller/products/edit/{product.name}/{product.id}", method = RequestMethod.POST)
     public String editSellerProduct(@RequestParam("editProductId") int id, Model model) {
     	
@@ -239,6 +306,15 @@ public class UserController {
     	return "seller-edit-product";
     }
     
+    /**
+     * POST mapping = /seller/products/edit/confirm
+     * handles edited product information
+     * @param product
+     * @param cat
+     * @param bindingResult
+     * @param model
+     * @return on success - view products, on failure - error page
+     */
     @RequestMapping(value = "seller/products/edit/confirm", method = RequestMethod.POST)
     public String editProductConfirm(@ModelAttribute("product") Product product, @RequestParam(required = true) String cat, BindingResult bindingResult,
     		Model model){
@@ -271,7 +347,11 @@ public class UserController {
     	return "view_products";
     }
     
-    
+    /**
+     * GET mapping for redirecting
+     * @param model
+     * @return
+     */
     @RequestMapping(value = {"/", "/welcome", "/home"}, method = RequestMethod.GET)
     public String welcome(Model model) {
     	
@@ -290,6 +370,11 @@ public class UserController {
         return "error";
     }
     
+    /**
+     * GET mapping = /error
+     * @param model
+     * @return error page
+     */
     @RequestMapping(value = "/error", method = RequestMethod.GET)
     public String errorPage(Model model) {
     	return "error";

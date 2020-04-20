@@ -57,11 +57,13 @@ public class AuctionController {
     private BidValidator bidValidator;
     
     private Logger _LOGGER = LoggerFactory.getLogger(UserRepository.class);
+    
     /**
-     * Mapping 
+     * GET mapping = /seller/auction/add/{prodName}/{id} 
+     * Add product to auction form
      * @param model
      * @param id
-     * @return
+     * @return auction form
      */
     @RequestMapping(value = "seller/auction/add/{productName}/{id}",method = RequestMethod.GET)
     public String addProductToAuctionForm(Model model, @PathVariable int id) {
@@ -85,6 +87,17 @@ public class AuctionController {
 		}
     }
     
+    /**
+     * POST mapping = /seller/auction/add/{prodName}/{id}
+     * Handles adding product to auction
+     * @param auction
+     * @param prodName
+     * @param startTime
+     * @param endTime
+     * @param id
+     * @param model
+     * @return on success - seller home page, on failure - error page
+     */
     @RequestMapping(value = "seller/auction/add/{productName}/{id}", method = RequestMethod.POST)
     public String addProductToAuction(@ModelAttribute("auctionObj") Auction auction, @PathVariable("productName") String prodName,
     	@RequestParam("startTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime startTime, 
@@ -112,7 +125,13 @@ public class AuctionController {
     return result;
     }
     
-    
+    /**
+     * GET mapping = /seller/auction/update/{prodName}/{id}
+     * Handles update product request
+     * @param model
+     * @param id
+     * @return product form
+     */
     @RequestMapping(value = "seller/auction/update/{productName}/{id}",method = RequestMethod.GET)
     public String updateAuctionForm(Model model, @PathVariable int id) {
     	
@@ -135,6 +154,17 @@ public class AuctionController {
 		}
     }
     
+    /**
+     * POST mapping = /seller/auction/update/{prodName}/{id}
+     * Handles updating auction information
+     * @param auction
+     * @param prodName
+     * @param startTime
+     * @param endTime
+     * @param id
+     * @param model
+     * @return on success- auction view page, on failure - error page
+     */
     @RequestMapping(value = "seller/auction/update/{productName}/{id}",method = RequestMethod.POST)
     public String updateAuctionFormConfirm(@ModelAttribute("auctionObj") Auction auction, @PathVariable("productName") String prodName,
         	@RequestParam("startTime") @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime startTime, 
@@ -159,6 +189,14 @@ public class AuctionController {
 		}
     }
     
+    /**
+     * POST mapping = /seller/auction/remove/{productName}/{id}
+     * Handles delete auction request
+     * @param name
+     * @param id
+     * @param model
+     * @return on success - seller home page, on failure - error page
+     */
     @RequestMapping(value = "seller/auction/remove/{productName}/{id}", method = RequestMethod.POST)
     public String removeProductFromAuction(@PathVariable("productName") String name, @PathVariable int id, Model model) {
     	
@@ -179,7 +217,12 @@ public class AuctionController {
 		return "error";
     }
     
-    
+    /**
+     * GET mapping = /seller/auction/viewall
+     * returns all auctioned products
+     * @param model
+     * @return auction view page
+     */
     @RequestMapping(value = "seller/auction/viewall",method = RequestMethod.GET)
     public String getSellerProductsInAuction(Model model) {
     	try {
@@ -198,7 +241,13 @@ public class AuctionController {
     	return "auction-view-seller";
     }
     
-   
+    /**
+     * GET mapping = /seller/auction/view/bids/{productName}/{id}
+     * View all bids placed on an auction
+     * @param model
+     * @param id
+     * @return bid view page
+     */
     @RequestMapping(value = "seller/auction/view/bids/{productName}/{id}", method = RequestMethod.GET)
     public String getAuctionBids(Model model, @PathVariable int id) {
     	try {
@@ -246,10 +295,16 @@ public class AuctionController {
     
     
     
-    /**
-     * User controller method..
+    /*
+     * ---------------------------------------------------------Buyer controller methods--------------------------------------------------------------
      */
     
+    /**
+     * GET mapping = /buyer/auction/viewall
+     * View all auctioned products - buyer
+     * @param model
+     * @return auction view
+     */
     @RequestMapping(value = "buyer/auction/viewall",method = RequestMethod.GET)
     public String getProductsInAuction(Model model) {
     	List<Auction> auctions = auctionService.getAllActiveAuctions();
@@ -261,6 +316,12 @@ public class AuctionController {
     	return "auction-view-buyer";
     }
     
+    /**
+     * GET mapping = /buyer/auction/view/bids
+     * View bids placed by the user
+     * @param model
+     * @return user bid view page
+     */
     @RequestMapping(value = "buyer/auction/view/bids",method = RequestMethod.GET)
     public String getUserBids(Model model) {
     	try {
@@ -280,6 +341,13 @@ public class AuctionController {
     	return "bid-view-buyer";
     }
     
+    /**
+     * GET mapping = /buyer/auction/bid/{productName}/{id}
+     * Main page for bidding on auctioned products
+     * @param model
+     * @param id
+     * @return main bid view
+     */
     @RequestMapping(value = "buyer/auction/bid/{productName}/{id}", method = RequestMethod.GET)
     public String getUserBidPage(Model model, @PathVariable int id) {
     	try {
@@ -309,6 +377,17 @@ public class AuctionController {
     	return "bid-view";
     }
     
+    /**
+     * GET mapping = /buyer/auction/bids/{productName}/{id}
+     * Place user bid on auction
+     * Implements bid validator
+     * @param bidForm
+     * @param id
+     * @param prodName
+     * @param bindingresult
+     * @param model
+     * @return on success - main bid view, on failure - error page
+     */
     @RequestMapping(value = "buyer/auction/bid/{productName}/{id}", method = RequestMethod.POST)
     public String placeUserBid(@ModelAttribute("bidObj") BidForm bidForm, @PathVariable int id, @PathVariable("productName") String prodName,
     		BindingResult bindingresult, Model model){
@@ -333,6 +412,14 @@ public class AuctionController {
     		return getUserBidPage(model, id);
     }
     
+    /**
+     * GET mapping = /buyer/auction/bid/placed/{productName}/{id}
+     * View auction that user has placed bids for 
+     * @param id
+     * @param prodName
+     * @param model
+     * @return view user bids page
+     */
     @RequestMapping(value = "buyer/auction/bid/placed/{productName}/{id}", method = RequestMethod.GET)
     public String getPlacedUserBidView(@PathVariable int id, @PathVariable("productName") String prodName ,Model model) {
     	try {
